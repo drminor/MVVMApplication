@@ -36,6 +36,7 @@
             <pb:PropItem PropertyName="Profession" PropertyType="Infra:Profession">
                 <pb:InitialValueField SetToDefault="True"/>
             </pb:PropItem>
+            
 
         </pb:PropBagTemplate.Props>
     </pb:PropBagTemplate>
