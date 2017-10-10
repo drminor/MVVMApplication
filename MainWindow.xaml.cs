@@ -1,19 +1,8 @@
-﻿using MVVMApplication.Infra;
+﻿using DRM.PropBag.ControlsWPF;
+using MVVMApplication.Infra;
 using MVVMApplication.ViewModel;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MVVMApplication
 {
@@ -22,13 +11,52 @@ namespace MVVMApplication
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        //Dictionary<string, BoundPropBag> _boundPropBags;
+
+        [PropBagInstanceAttribute("MainVM", "There is only one ViewModel in this View.")]
+        public MainWindowViewModel OurData
         {
+            get
+            {
+                object x = this.DataContext;
+                if(x is MainWindowViewModel)
+                {
+                    return (MainWindowViewModel)this.DataContext;
+                } 
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("DataContext for MainWindow is not of type MainWindowViewModel");
+                    return null;
+                }
+            }
+            set
+            {
+                this.DataContext = value;
+            }
+        }
+
+        public MainWindow(MainWindowViewModel mainViewModel)
+        {
+            //byte b = 0xf;
+            //OurData = new MainWindowViewModel(b);
+
+
+            System.Diagnostics.Debug.WriteLine("Just before MainWindow InitComp.");
             InitializeComponent();
-            (this.DataContext as MainWindowViewModel).ShowMessageBox += delegate (object sender, EventArgs args)
+            System.Diagnostics.Debug.WriteLine("Just afer MainWindow InitComp.");
+
+            System.Diagnostics.Debug.WriteLine("Just before setting DataContext to the MainWindowVM provided in the constructor.");
+            OurData = mainViewModel;
+            System.Diagnostics.Debug.WriteLine("Just after setting DataContext to the new MainWindowVM provided in the constructor.");
+
+
+            OurData.ShowMessageBox += delegate (object sender, EventArgs args)
             {
                 MessageBox.Show(((MessageEventArgs)args).Message);
             };
+
+            //Grid topGrid = (Grid)this.FindName("TopGrid");
+            //_boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
         }
     }
 }

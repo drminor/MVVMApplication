@@ -1,44 +1,43 @@
-﻿using MVVMApplication.Infra;
+﻿using DRM.PropBag;
+using MVVMApplication.Infra;
 using MVVMApplication.Model;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MVVMApplication.ViewModel
 {
-    public class MainWindowViewModel:NotificationClass
+    public partial class MainWindowViewModel : IPropBagMin
     {
-        Business _business;
-        private Person _person;
+
         public EventHandler ShowMessageBox = delegate { };
         public MainWindowViewModel()
-        {          
-            _business = new Business();
-            PersonCollection = new ObservableCollection<Person>(_business.Get());
+        {
+            System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- no Params.");
+            _pm = null;
+            InitMe();
+
+            //PopPeople();
+
+            System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- no Params.");
         }
 
-        private ObservableCollection<Person> personCollection;
-        public ObservableCollection<Person> PersonCollection
+        //public Business Business { get; }
+
+        //private PersonCollectionViewModel _personCollectionVM;
+        //public PersonCollectionViewModel PersonCollectionVM
+        //{
+        //    get { return _personCollectionVM; }
+        //    set
+        //    {
+        //        _personCollectionVM = value;
+        //        OnPropertyChanged(nameof(PersonCollectionVM));
+        //    }
+        //}
+
+        public void PopPeople()
         {
-            get { return personCollection; }
-            set { personCollection = value;
-                OnProprtyChanged();
-            }
-        }
-        public Person SelectedPerson
-        {
-            get
-            {
-                return _person;
-            }
-            set
-            {
-                _person = value;
-                OnProprtyChanged();
-            }
+            PersonCollectionViewModel pcvm = base.GetIt<PersonCollectionViewModel>("PersonCollectionVM");
+            Business b = GetIt<Business>("Business");
+            pcvm.PopPeople(b);
         }
 
 
@@ -52,17 +51,17 @@ namespace MVVMApplication.ViewModel
 
         private void AddPerson()
         {
-            try
-            {
-                SelectedPerson = new Person();                       
-            }
-            catch (Exception ex)
-            {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
-            }            
+            //try
+            //{
+            //    SelectedPerson = new Person();                       
+            //}
+            //catch (Exception ex)
+            //{
+            //    ShowMessageBox(this, new MessageEventArgs()
+            //    {
+            //        Message = ex.Message
+            //    });
+            //}            
         }
 
         public RelayCommand Save
@@ -75,22 +74,24 @@ namespace MVVMApplication.ViewModel
 
         private void SavePerson()
         {
-            try
-            {
-                _business.Update(SelectedPerson);
-                PersonCollection = new ObservableCollection<Person>(_business.Get());
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = "Changes are saved !"
-                });
-            }
-            catch (Exception ex)
-            {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
-            }               
+            //try
+            //{
+            //    _business.Update(SelectedPerson);
+
+            //    PopPeople();
+
+            //    ShowMessageBox(this, new MessageEventArgs()
+            //    {
+            //        Message = "Changes are saved !"
+            //    });
+            //}
+            //catch (Exception ex)
+            //{
+            //    ShowMessageBox(this, new MessageEventArgs()
+            //    {
+            //        Message = ex.Message
+            //    });
+            //}               
           
         }
 
@@ -104,7 +105,9 @@ namespace MVVMApplication.ViewModel
 
         private void DeletePerson()
         {
-            _business.Delete(SelectedPerson);
+            //_business.Delete(SelectedPerson);
+
+            //    PopPeople();
         }
     }
 }

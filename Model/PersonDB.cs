@@ -9,7 +9,7 @@ namespace MVVMApplication.Model
 {
     public class PersonDB:DbContext
     {
-        public PersonDB():base("name=DefaultConnection")
+        public PersonDB():base("name=DefaultConnection2")
         {
 
         }

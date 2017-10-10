@@ -24,6 +24,7 @@ namespace MVVMApplication.Model
         internal void Delete(Person person)
         {
             _dbContext.Person.Remove(person);
+            _dbContext.SaveChanges();
         }
 
         internal void Update(Person updatedPerson)

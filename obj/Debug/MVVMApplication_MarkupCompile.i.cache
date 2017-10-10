@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-D:\Blogs\MVVMApplication\MVVMApplication\MVVMApplication\obj\Debug\
+C:\DEV\VS2013Projects\PubPropBag\MVVMApplication\obj\Debug\
 MVVMApplication
 none
 false
 DEBUG;TRACE
-D:\Blogs\MVVMApplication\MVVMApplication\MVVMApplication\App.xaml
-2749950068
+C:\DEV\VS2013Projects\PubPropBag\MVVMApplication\App.xaml
+6-1404928186
 
-171909377259
-161358767001
-MainWindow.xaml;View\PersonCollection.xaml;
+281206201459
+20-272950154
+MainWindow.xaml;PropBagTemplates\MainWindowVM.xaml;PropBagTemplates\PersonCollectionVM.xaml;PropBagTemplates\PersonVM.xaml;StartUpWindow.xaml;View\PersonCollection.xaml;
 
-True
+False
 

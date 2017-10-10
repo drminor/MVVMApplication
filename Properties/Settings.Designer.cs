@@ -12,7 +12,7 @@ namespace MVVMApplication.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,6 +20,37 @@ namespace MVVMApplication.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("EmitProxy")]
+        public global::DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum MappingStrategy {
+            get {
+                return ((global::DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum)(this["MappingStrategy"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider MapperConfigurationProvider {
+            get {
+                return ((global::DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider)(this["MapperConfigurationProvider"]));
+            }
+            set {
+                this["MapperConfigurationProvider"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider ModuleBuilderInfoProvider {
+            get {
+                return ((global::DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider)(this["ModuleBuilderInfoProvider"]));
+            }
+            set {
+                this["ModuleBuilderInfoProvider"] = value;
             }
         }
     }

@@ -2,8 +2,15 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:MVVMApplication"
-             StartupUri="MainWindow.xaml">
+             StartupUri="StartUpWindow.xaml">
     <Application.Resources>
          
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="PropBagTemplates/MainWindowVM.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/PersonCollectionVM.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/PersonVM.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
