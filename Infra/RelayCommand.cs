@@ -17,7 +17,6 @@ namespace MVVMApplication.Infra
             _localCanExecute = canExecute;
         }
 
-
         public event EventHandler CanExecuteChanged;
 
         public bool CanExecute(object parameter)

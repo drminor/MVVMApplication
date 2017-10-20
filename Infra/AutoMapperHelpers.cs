@@ -2,14 +2,10 @@
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
-using DRM.PropBag.ViewModelBuilder;
-
 using DRM.PropBag.ControlsWPF.WPFHelpers;
-
+using DRM.PropBag.ViewModelBuilder;
+using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Windows;
 
 namespace MVVMApplication.Infra
 {
@@ -29,7 +25,6 @@ namespace MVVMApplication.Infra
             T result = (T)Activator.CreateInstance(typeof(T), pm, propFactory);
             return result;
         }
-
 
         // TODO: Consider supporting finding the PBT requied for a mapper by class name.
         public static PropBagMapper<TSource, TDestination> GetMapper<TSource, TDestination>(string instanceKey)

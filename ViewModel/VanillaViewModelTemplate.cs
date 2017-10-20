@@ -1,7 +1,8 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 
-namespace MVVMApplication.Model
+namespace MVVMApplication.ViewModel
 {
     public class VanillaViewModelTemplate : PropBag
     {

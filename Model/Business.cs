@@ -21,9 +21,10 @@ namespace MVVMApplication.Model
             return _dbContext.Person.ToList();
         }
 
-        internal void Delete(Person person)
+        internal void Delete(Person personToDelete)
         {
-            _dbContext.Person.Remove(person);
+            Person foundPerson = _dbContext.Person.Find(new object[] { personToDelete.Id });
+            _dbContext.Person.Remove(foundPerson);
             _dbContext.SaveChanges();
         }
 

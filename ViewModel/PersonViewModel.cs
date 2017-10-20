@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using MVVMApplication.Infra;
 
 namespace MVVMApplication.ViewModel
@@ -12,13 +13,6 @@ namespace MVVMApplication.ViewModel
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonViewModel -- no Params.");
         }
-
-        public PersonVM(byte dummy) : base(dummy) { }
-
-        public PersonVM(PropBagTypeSafetyMode safetyMode) : base(safetyMode) { }
-
-        public PersonVM(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory)
-            : base(typeSafetyMode, thePropFactory) { }
 
         // TODO: Fix this
         // Either build a universal Type Resolver
