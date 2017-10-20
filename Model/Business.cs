@@ -23,6 +23,8 @@ namespace MVVMApplication.Model
 
         internal void Delete(Person personToDelete)
         {
+            if(personToDelete == null || personToDelete.Id == 0) return;
+
             Person foundPerson = _dbContext.Person.Find(new object[] { personToDelete.Id });
             _dbContext.Person.Remove(foundPerson);
             _dbContext.SaveChanges();
