@@ -4,16 +4,32 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVMApplication"
+        xmlns:infra="clr-namespace:MVVMApplication.Infra"
         xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
         xmlns:view="clr-namespace:MVVMApplication.View"
         xmlns:pbb="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="725">
     
-    <Window.DataContext>
+    <!--<Window.DataContext>
         <vmod:MainWindowViewModel></vmod:MainWindowViewModel>
+    </Window.DataContext>-->
+
+    <Window.Resources>
+        <ObjectDataProvider x:Key="myDataSource" ObjectType="{x:Type infra:DataContextProvider}" MethodName="GetData">
+            <ObjectDataProvider.ConstructorParameters>
+                <sys:String>MainWindowVM</sys:String>
+            </ObjectDataProvider.ConstructorParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <Binding Source="{StaticResource myDataSource}"/>
     </Window.DataContext>
-    
+
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>

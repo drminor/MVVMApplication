@@ -69,8 +69,8 @@
     <Compile Include="Infra\AutoMapperHelpers.cs" />
     <Compile Include="Infra\NotificationClass.cs" />
     <Compile Include="Infra\RelayCommand.cs" />
-    <Compile Include="Infra\SettingsExtensions.cs" />
     <Compile Include="Infra\Utility.cs" />
+    <Compile Include="Infra\DataContextProvider.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModel\PersonCollectionPlainViewModel.cs" />
     <Compile Include="View\PersonCollectionPlain.xaml.cs">
@@ -84,7 +84,6 @@
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\PersonCollectionViewModel.cs" />
     <Compile Include="ViewModel\PersonViewModel.cs" />
-    <Compile Include="ViewModel\VanillaViewModelTemplate.cs" />
     <Compile Include="View\MainWindowPlain.xaml.cs">
       <DependentUpon>MainWindowPlain.xaml</DependentUpon>
     </Compile>
@@ -176,6 +175,10 @@
     <ProjectReference Include="..\PubPropBag\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PubPropBag\ViewModelTools\ViewModelTools.csproj">
+      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
+      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

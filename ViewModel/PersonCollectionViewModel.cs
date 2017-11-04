@@ -1,34 +1,28 @@
-﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
+﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
 
-using DRM.PropBag.ControlsWPF;
-
-using System.Linq;
 using System;
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace MVVMApplication.ViewModel
 {
-    public partial class PersonCollectionViewModel : PropBagMin
+    public partial class PersonCollectionViewModel : PropBag
     {
         //PropModel _pm;
 
         Business _business;
+
         public EventHandler ShowMessageBox = delegate { };
-        public event EventHandler GridNeedsRefreshing = delegate { };
+        public event EventHandler GridNeedsRefreshing;
 
+        public PersonCollectionViewModel() { }
 
-        public PersonCollectionViewModel() : this(PropBagTemplateResources.GetPropBagTemplate("PersonCollectionVM").GetPropModel(),
-                  SettingsExtensions.ThePropFactory)
-        {
-            System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- using PropBagTemplateResources.");
-        }
-
-        public PersonCollectionViewModel(PropModel pm, IPropFactory pf) : base(pm, pf)
+        public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory) : base(pm, fullClassName, propFactory)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 
@@ -39,17 +33,18 @@ namespace MVVMApplication.ViewModel
             //this.PropertyChanged += PersonCollectionViewModel_PropertyChanged;
         }
 
-        public void PopPeople(Business business)
+        public ObservableCollection<PersonVM> GetMappedPeople(Business business)
         {
             _business = business;
             var people = business.Get();
 
-            if (Mapper == null) return;
+            if (Mapper == null)
+                return new ObservableCollection<PersonVM>();
 
-            var mappedPeople = Mapper.MapToDestination(people);
+            IEnumerable<PersonVM> mappedPeopleRaw = Mapper.MapToDestination(people);
 
-            PersonListC pList = new PersonListC(mappedPeople);
-            base.SetIt<PersonListC>(pList, "PersonList");
+            ObservableCollection<PersonVM> mappedPeople = new ObservableCollection<PersonVM>(mappedPeopleRaw);
+            return mappedPeople;
         }
 
         public RelayCommand Add
@@ -59,7 +54,6 @@ namespace MVVMApplication.ViewModel
                 var x = new RelayCommand(AddPerson, true);
                 x.CanExecuteChanged += X_CanExecuteChanged;
                 return x;
-
             }
         }
 
@@ -70,50 +64,17 @@ namespace MVVMApplication.ViewModel
 
         private void AddPerson()
         {
-            // This is the code needed for Mapping Strategy = ExtraMembers.
-
+            ObservableCollection<PersonVM> personList;
             try
             {
+                personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
                 Person p = new Person();
                 PersonVM newPerson = Mapper.MapToDestination(p);
+
+                personList.Add(newPerson);
+
                 SetIt<PersonVM>(newPerson, "SelectedPerson");
-            }
-            catch (Exception ex)
-            {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
-            }
-        }
-
-        public RelayCommand Save
-        {
-            get
-            {
-                return new RelayCommand(SavePerson, true);
-            }
-        }
-
-        private void SavePerson()
-        {
-            try
-            {
-                PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
-
-                Person unMapped = GetUnMappedPerson(selectedPerson);
-                bool newP = unMapped.Id == 0;
-
-                _business.Update(unMapped);
-
-                if (newP)
-                {
-                    PopPeople(_business);
-                }
-                else
-                {
-                    OnGridNeedsRefreshing();
-                }
+                OnGridNeedsRefreshing();
 
                 ShowMessageBox(this, new MessageEventArgs()
                 {
@@ -129,13 +90,53 @@ namespace MVVMApplication.ViewModel
             }
         }
 
-        public RelayCommand Delete
+        public RelayCommand Save => new RelayCommand(SavePerson, true);
+
+        private void SavePerson()
         {
-            get
+            try
             {
-                return new RelayCommand(DeletePerson, true);
+                ObservableCollection<PersonVM> personList;
+                personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+
+                PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
+                Person unMapped = GetUnMappedPerson(selectedPerson);
+                //Person unMapped = personList.FirstOrDefault((x) => x.GetIt<int>("Id") == unMapped.Id);
+
+                //bool newP = unMapped.Id == 0;
+
+                _business.Update(unMapped);
+
+
+                //if(TryGetListSource("PersonList", typeof(ObservableCollection<PersonVM>), out IListSource listSource))
+                //{
+                //    personList = (ObservableCollection<PersonVM>) listSource.GetList();
+                //    PersonVM person = personList.FirstOrDefault((x) => x.GetIt<int>("Id") == unMapped.Id);
+
+                //    Person unMapped = GetUnMappedPerson(selectedPerson);
+                //    bool newP = unMapped.Id == 0;
+
+                //    _business.Update(unMapped);
+                //}
+
+                OnGridNeedsRefreshing();
+
+                ShowMessageBox(this, new MessageEventArgs()
+                {
+                    Message = "Changes are saved !"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(this, new MessageEventArgs()
+                {
+                    Message = ex.Message
+                });
             }
         }
+
+        public RelayCommand Delete => new RelayCommand(DeletePerson, true);
 
         private void DeletePerson()
         {
@@ -146,12 +147,25 @@ namespace MVVMApplication.ViewModel
             Person unMapped = GetUnMappedPerson(selectedPerson);
             _business.Delete(unMapped);
 
-            PopPeople(_business);
-            ShowMessageBox(this, new MessageEventArgs()
-            {
-                Message = "Items has been deleted!"
-            });
+            if (selectedPerson != null)
+                {
+                ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+                personList.Remove(selectedPerson);
 
+                //if (TryGetListSource("PersonList", typeof(ObservableCollection<PersonVM>), out IListSource listSource))
+                //{
+                //    ObservableCollection<PersonVM> personList = (ObservableCollection<PersonVM>)listSource.GetList();
+                //    personList.Remove(selectedPerson);
+                //}
+
+                OnGridNeedsRefreshing();
+
+                ShowMessageBox(this, new MessageEventArgs()
+                {
+                    Message = "Selected Person has been removed!"
+                });
+
+           }
         }
 
         private void OnGridNeedsRefreshing()
@@ -161,34 +175,29 @@ namespace MVVMApplication.ViewModel
 
         #region PropBag Support
 
-        private readonly string PERSON_VM_INSTANCE_KEY = "PersonVM";
+        private readonly string PERSON_INSTANCE_KEY = "PersonVM";
 
-        private PropBagMapper<Person, PersonVM> _mapper;
-        private PropBagMapper<Person, PersonVM> Mapper
+        private IPropBagMapper<Person, PersonVM> _mapper;
+        private IPropBagMapper<Person, PersonVM> Mapper
         {
             get
             {
                 if (_mapper == null)
                 {
-                    _mapper = AutoMapperHelpers.GetMapper<Person, PersonVM>(PERSON_VM_INSTANCE_KEY);
+                    IPropBagMapperKey<Person, PersonVM> mapperRequest
+                        = JustSayNo.AutoMapperProvider.RegisterMapperRequest<Person, PersonVM>
+                         (
+                             PERSON_INSTANCE_KEY,
+                            typeof(PersonVM),
+                            configPackageName: "Extra_Members", // "Emit_Proxy",
+                            propFactory: null);
+
+                    _mapper = JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
+
                 }
                 return _mapper;
             }
         }
-
-
-        //private PropBagMapper<PersonVM, Person> _mapperB;
-        //private PropBagMapper<PersonVM, Person> MapperB
-        //{
-        //    get
-        //    {
-        //        if (_mapperB == null)
-        //        {
-        //            _mapperB = AutoMapperHelpers.GetMapper<PersonVM, Person>(PERSON_VM_INSTANCE_KEY);
-        //        }
-        //        return _mapperB;
-        //    }
-        //}
 
         private Person GetUnMappedPerson(PersonVM mappedPerson)
         {

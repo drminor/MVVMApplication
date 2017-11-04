@@ -1,28 +1,20 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
 using System;
+using System.Collections.ObjectModel;
 
 namespace MVVMApplication.ViewModel
 {
-    public partial class MainWindowViewModel : PropBagMin
+    public class MainWindowViewModel : PropBag
     {
         //PropModel _pm;
 
         public EventHandler ShowMessageBox = delegate { };
 
-        public MainWindowViewModel() : this(PropBagTemplateResources.GetPropBagTemplate("MainWindowVM").GetPropModel(),
-                  SettingsExtensions.ThePropFactory)
-        {
-            System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel, using default constructor, that loads a PropModel.");
-            System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel, using default constructor, that loads a PropModel.");
-        }
-
-        public MainWindowViewModel(PropModel pm, IPropFactory pf) : base(pm, pf)
+        public MainWindowViewModel(PropModel pm, string fullClassName, IPropFactory propFactory) : base(pm, fullClassName, propFactory)
         {
             // Save a reference to the model used to defined our properties.
             //_pm = pm;
@@ -37,13 +29,34 @@ namespace MVVMApplication.ViewModel
 
         private void Initialize_PersonCollectionVM()
         {
-            SetIt(new Business(), "Business");
+            // Intialize our Business property.
+            Business b = new Business();
+            SetIt(b, "Business");
 
-            string instanceKey = "PersonCollectionVM";
-            PersonCollectionViewModel pcvm
-                = AutoMapperHelpers.GetNewViewModel<PersonCollectionViewModel>
-                (instanceKey: instanceKey, propFactory: SettingsExtensions.ThePropFactory);
+            // Create a new PersonCollection ViewModel.
+            string resourceKey = "PersonCollectionVM";
 
+            object test = JustSayNo.ViewModelHelper.GetNewViewModel(resourceKey);
+
+            //PersonCollectionViewModel pcvm = (PersonCollectionViewModel)JustSayNo.ViewModelHelper.GetNewViewModel(resourceKey);
+
+            PersonCollectionViewModel pcvm = (PersonCollectionViewModel)test;
+
+
+            // Get PersonList from the child View Model.
+            ObservableCollection<PersonVM> mappedPeople = pcvm.GetMappedPeople(b);
+
+            // Set the child View Model's PersonList to the new list.
+            //pcvm.SetIt<ObservableCollection<PersonVM>>(mappedPeople, "PersonList");
+            pcvm.SetIt(mappedPeople, "PersonList");
+
+            PersonVM personVM = null;
+
+            // Set the selected person to null. -- TODO: get the currently selected item.
+            //pcvm.SetIt<PersonVM>(personVM, "SelectedPerson");
+            pcvm.SetIt(personVM, "SelectedPerson");
+
+            // Subscribe to our child ViewModel's ShowMessageBox event.
             pcvm.ShowMessageBox += delegate (object sender, EventArgs args)
             {
                 // Pass messages from the child view model to our listeners (i.e., our parent window.)
@@ -51,21 +64,11 @@ namespace MVVMApplication.ViewModel
             };
 
             // Set the value of our Property Named: PersonCollectionVM.
-            string propertyName = "PersonCollectionVM";
-            SetIt<PersonCollectionViewModel>(pcvm, propertyName);
+            //SetIt<PersonCollectionViewModel>(pcvm, "PersonCollectionVM");
+            SetIt(pcvm, "PersonCollectionVM");
 
-            PopPeople();
 
             //pcvm.SubscribeToPropChanged<PersonVM>(SelectedPersonChanged, "SelectedPerson");
-        }
-
-        public void PopPeople()
-        {
-            PersonCollectionViewModel pcvm = GetIt<PersonCollectionViewModel>("PersonCollectionVM");
-            Business b = GetIt<Business>("Business");
-            pcvm.PopPeople(b);
-
-            PersonListC test = pcvm.GetIt<PersonListC>("PersonList");
         }
 
         //private void SelectedPersonChanged(PersonVM oldval, PersonVM newVal)

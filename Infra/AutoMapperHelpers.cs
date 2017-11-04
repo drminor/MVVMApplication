@@ -2,75 +2,104 @@
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
-using DRM.PropBag.ViewModelBuilder;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.ComponentModel;
+using System.Windows;
 
 namespace MVVMApplication.Infra
 {
-    static class AutoMapperHelpers
+    public class AutoMapperHelpers
     {
-        public static T GetNewViewModel<T>(string instanceKey, IPropFactory propFactory) where T : IPropBagMin
+        public AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
-            PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate(instanceKey);
+            IPropBagMapperBuilderProvider propBagMapperBuilderProvider
+                = new SimplePropBagMapperBuilderProvider(wrapperTypeCreator: null, viewModelActivator: null);
 
-            return GetNewViewModel<T>(pbt, propFactory);
-        }
+            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
-        public static T GetNewViewModel<T>(PropBagTemplate pbt, IPropFactory propFactory) where T : IPropBagMin
-        {
-            PropModel pm = pbt.GetPropModel();
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
 
-            T result = (T)Activator.CreateInstance(typeof(T), pm, propFactory);
-            return result;
-        }
+            AutoMapperProvider autoMapperProvider = new AutoMapperProvider
+                (
+                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                mappersCachingService: mappersCachingService,
+                mapperBuilderProvider: propBagMapperBuilderProvider,
+                propModelProvider: propModelProvider
+                );
 
-        // TODO: Consider supporting finding the PBT requied for a mapper by class name.
-        public static PropBagMapper<TSource, TDestination> GetMapper<TSource, TDestination>(string instanceKey)
-        {
-            PropBagMappingStrategyEnum mappingStrategy = SettingsExtensions.MappingStrategy;
-            PropBagMapper<TSource, TDestination> result = null;
-
-            ConfiguredMappers mappersCache = SettingsExtensions.ConfiguredMappers;
-            IModuleBuilderInfo propBagProxyBuilder = SettingsExtensions.PropBagProxyBuilder;
-
-            Type dtViewModelType = typeof(TDestination);
-
-            if (PropBagTemplateResources.PropBagTemplates == null)
-            {
-                System.Diagnostics.Debug.WriteLine("PCVM could not get BoundPropBags from Appliation Resources.");
-                return result;
-            }
-
-            PropBagTemplate bpTemplate = PropBagTemplateResources.GetPropBagTemplate(instanceKey);
-
-            PropModel propModel = bpTemplate.GetPropModel();
-
-            TypeDescription typeDescription = propModel.BuildTypeDesc(dtViewModelType);
-
-            if (typeDescription == null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Could not build a TypeDescription from the PropMode with instance key = {instanceKey}.");
-                return result;
-            }
-
-            Type rtViewModelType = propBagProxyBuilder.BuildVmProxyClass(typeDescription);
-
-            PropBagMapperKey<TSource, TDestination> mapperRequest
-                = new PropBagMapperKey<TSource, TDestination>
-                    (propModel, rtViewModelType, mappingStrategy);
-
-            mappersCache.Register(mapperRequest);
-
-            result = (PropBagMapper<TSource, TDestination>)mappersCache.GetMapperToUse(mapperRequest);
-            if(result == null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Could not get an AutoMapper for <{typeof(TSource)},{typeof(TDestination)}>");
-            }
-
-            return result;
+            return autoMapperProvider;
         }
     }
-    
+
+    // TODO: Fix this!!
+    public static class JustSayNo // To using Static-based config providers.
+    {
+        public static PropModelProvider PropModelProvider { get; }
+        public static ViewModelHelper ViewModelHelper { get; }
+        public static AutoMapperProvider AutoMapperProvider { get; }
+        public static IPropFactory ThePropFactory { get; }
+
+        static JustSayNo() 
+        {
+            ThePropFactory = new PropFactory
+                (
+                    //returnDefaultForUndefined: false,
+                    typeResolver: GetTypeFromName,
+                    valueConverter: null
+                );
+
+            IPropBagTemplateProvider propBagTemplateProvider
+                = new PropBagTemplateProvider(Application.Current.Resources);
+
+            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory);
+
+            ViewModelHelper = new ViewModelHelper(PropModelProvider);
+
+            AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider);
+        }
+
+        public static Type GetTypeFromName(string typeName)
+        {
+            Type result;
+            try
+            {
+                result = Type.GetType(typeName);
+            }
+            catch (System.Exception e)
+            {
+                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
+            }
+
+            if (result == null)
+            {
+                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
+            }
+
+            return result;
+        }
+
+        #region InDesign Support
+        public static bool InDesignMode() => _isInDesignMode.HasValue && _isInDesignMode == true;
+
+        public static bool? _isInDesignMode;
+
+        public static bool IsInDesignModeStatic
+        {
+            get
+            {
+                if (!_isInDesignMode.HasValue)
+                {
+                    var prop = DesignerProperties.IsInDesignModeProperty;
+                    _isInDesignMode
+                        = (bool)DependencyPropertyDescriptor
+                                        .FromProperty(prop, typeof(FrameworkElement))
+                                        .Metadata.DefaultValue;
+                }
+
+                return _isInDesignMode.Value;
+            }
+        }
+        #endregion
+    }
 }

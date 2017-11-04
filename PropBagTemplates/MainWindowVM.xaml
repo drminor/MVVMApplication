@@ -6,9 +6,14 @@
 
         <pb:PropBagTemplate x:Key="MainWindowVM"
                 ClassName="MainWindowViewModel"
-                InstanceKey="MainWindowVM"
-                TypeSafetyMode="Tight"
-                OutPutNameSpace="MVVMApplication.ViewModel">
+                DeriveFromClassMode="Custom"
+                TargetType="{x:Type vMod:MainWindowViewModel}"
+                OutPutNameSpace="MVVMApplication.ViewModel"
+                TypeSafetyMode="Tight">
+        <pb:PropTypeInfoField
+            PropertyType="{x:Type vMod:MainWindowViewModel}">
+        </pb:PropTypeInfoField>
+            
         <pb:PropBagTemplate.Namespaces>
             <pb:NamespaceItem Namespace="MVVMApplication.Infra"/>
             <pb:NamespaceItem Namespace="MVVMApplication.Model"/>

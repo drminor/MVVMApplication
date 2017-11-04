@@ -15,8 +15,8 @@ namespace MVVMApplication
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            MVVMApplication.Properties.Settings.Default.MapperConfigurationProvider = new DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider();
-            MVVMApplication.Properties.Settings.Default.ModuleBuilderInfoProvider = new DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider();
+            //MVVMApplication.Properties.Settings.Default.MapperConfigurationProvider = new DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider();
+            //MVVMApplication.Properties.Settings.Default.ModuleBuilderInfoProvider = new DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider();
 
             base.OnStartup(e);
         }

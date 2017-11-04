@@ -2,12 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:Infra="clr-namespace:MVVMApplication.Infra"
                     xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-                    >
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
     <pb:PropBagTemplate x:Key="PersonVM"
             ClassName="PersonVM"
-            InstanceKey="PersonVM"
             TypeSafetyMode="Tight"
             OutPutNameSpace="MVVMApplication.ViewModel">
         <pb:PropBagTemplate.Namespaces>

@@ -1,6 +1,7 @@
 ﻿using MVVMApplication.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace MVVMApplication.View
 {
@@ -41,7 +42,36 @@ namespace MVVMApplication.View
             if(this.DataContext is PersonCollectionViewModel pcvm)
             {
                 pcvm.GridNeedsRefreshing += Pcvm_GridNeedsRefreshing;
+
+                CollectionViewSource cvs = Cv;
+                CollectionView x = (CollectionView)CollectionViewSource.GetDefaultView(cvs.Source);
             }
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (this.DataContext is PersonCollectionViewModel pcvm)
+            {
+                pcvm.GridNeedsRefreshing += Pcvm_GridNeedsRefreshing;
+                CollectionViewSource cvs = Cv;
+
+                CollectionView x = (CollectionView) CollectionViewSource.GetDefaultView(cvs.Source);
+
+                //pcvm.TheView = Cv;
+            }
+        }
+
+        public CollectionViewSource Cv
+        {
+            get
+            {
+                CollectionViewSource collectionViewSource = (CollectionViewSource)this.Resources["cvsPersonList"];
+
+                //ICollectionView cv = collectionViewSource.View;
+
+                return collectionViewSource;
+            }
+        }
+ 
     }
 }

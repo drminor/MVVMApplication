@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.ControlsWPF;
-using MVVMApplication.Infra;
+﻿using MVVMApplication.Infra;
 using MVVMApplication.View;
 using MVVMApplication.ViewModel;
 using System;
@@ -12,9 +11,6 @@ namespace MVVMApplication
     /// </summary>
     public partial class MainWindow : Window
     {
-        //Dictionary<string, BoundPropBag> _boundPropBags;
-
-        [PropBagInstanceAttribute("MainVM", "There is only one ViewModel in this View.")]
         public MainWindowViewModel OurData
         {
             get

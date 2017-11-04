@@ -1,4 +1,5 @@
-﻿using MVVMApplication.Infra;
+﻿using DRM.PropBag.Collections;
+using MVVMApplication.Infra;
 using MVVMApplication.Model;
 using System;
 using System.Collections.ObjectModel;
@@ -16,7 +17,7 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionPlainViewModel.");
 
             _business = business;
-            if(SettingsExtensions.InDesignMode())
+            if (JustSayNo.InDesignMode())
             {
                 PersonCollection = new ObservableCollection<Person>();
             }
@@ -24,6 +25,14 @@ namespace MVVMApplication.ViewModel
             {
                 PersonCollection = new ObservableCollection<Person>(business.Get());
             }
+            //if (SettingsExtensions.InDesignMode())
+            //{
+            //    PersonCollection = new PbCollection<Person>();
+            //}
+            //else
+            //{
+            //    PersonCollection = new PbCollection<Person>(business.Get());
+            //}
         }
 
         private ObservableCollection<Person> personCollection;
@@ -36,6 +45,17 @@ namespace MVVMApplication.ViewModel
                 OnPropertyChanged(nameof(PersonCollection));
             }
         }
+
+        //private PbCollection<Person> personCollection;
+        //public PbCollection<Person> PersonCollection
+        //{
+        //    get { return personCollection; }
+        //    set
+        //    {
+        //        personCollection = value;
+        //        OnPropertyChanged(nameof(PersonCollection));
+        //    }
+        //}
 
         private Person _person;
         public Person SelectedPerson
