@@ -1,7 +1,9 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
+using DRM.PropBag.ControlsWPF;
 using DRM.TypeSafePropertyBag;
+
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
 
@@ -13,30 +15,68 @@ namespace MVVMApplication.ViewModel
 {
     public partial class PersonCollectionViewModel : PropBag
     {
-        //PropModel _pm;
-
-        Business _business;
-
-        public EventHandler ShowMessageBox = delegate { };
         public event EventHandler GridNeedsRefreshing;
 
-        public PersonCollectionViewModel() { }
-
-        public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory) : base(pm, fullClassName, propFactory)
+        public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
+            : base(pm, fullClassName, propFactory)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 
-            // Save a reference to the model used to defined our properties.
-            //_pm = pm;
+            //// TODO: These should be part of the PropModel.
+            //bool wasAdded =  SubscribeToPropChanged(DoWhenBusinessChanges, "Business", typeof(Business));
+            //RegisterBinding<Business>("Business", "../Business");
 
-            //this.SelectedPersonChanged += PersonCollectionViewModel_SelectedPersonChanged;
-            //this.PropertyChanged += PersonCollectionViewModel_PropertyChanged;
+            //wasAdded = SubscribeToPropChanged(DoWhenSelectedPersonChanges, "SelectedPerson", typeof(PersonVM));
         }
 
-        public ObservableCollection<PersonVM> GetMappedPeople(Business business)
+
+        private void DoWhenBusinessChanges(object sender, PcGenEventArgs e)
         {
-            _business = business;
-            var people = business.Get();
+            System.Diagnostics.Debug.WriteLine("Business was changed.");
+            if (e.OldValue == null && e.NewValue != null)
+            {
+                Business business = (Business)e.NewValue;
+                FetchData(business);
+            }
+        }
+
+        //private void DoWhenSelectedPersonChanges(object sender, PcGenEventArgs e)
+        //{
+        //    System.Diagnostics.Debug.WriteLine("The selected person was changed.");
+
+        //    PersonVM old = (PersonVM) e.OldValue;
+        //    PersonVM newVal = (PersonVM)e.NewValue;
+        //}
+
+        //private void DoWhenBusinessChanges(object sender, PCTypedEventArgs<Business> e)
+        //{
+        //    System.Diagnostics.Debug.WriteLine("Business was changed.");
+        //    if(e.OldValue == null && e.NewValue != null)
+        //    {
+        //        Business business = (Business)e.NewValue;
+        //        FetchData(business);
+        //    }
+        //}
+
+        public void FetchData(Business business)
+        {
+            // Get List of people for this business.
+            ObservableCollection<PersonVM> mappedPeople = GetMappedPeople(business);
+
+            // Set our PersonList property.
+            SetIt(mappedPeople, "PersonList");
+
+            // Set the selected person the first item.
+            if (mappedPeople != null && mappedPeople.Count > 0)
+            {
+                PersonVM personVM = mappedPeople[0];
+                SetIt(personVM, "SelectedPerson");
+            }
+        }
+
+        private ObservableCollection<PersonVM> GetMappedPeople(Business business)
+        {
+            var people = business.Get(10);
 
             if (Mapper == null)
                 return new ObservableCollection<PersonVM>();
@@ -51,7 +91,7 @@ namespace MVVMApplication.ViewModel
         {
             get
             {
-                var x = new RelayCommand(AddPerson, true);
+                var x = new RelayCommand(AddPerson);
                 x.CanExecuteChanged += X_CanExecuteChanged;
                 return x;
             }
@@ -62,110 +102,78 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("The state of 'CanExecute' has changed for the Add command.");
         }
 
-        private void AddPerson()
+        private void AddPerson(object o)
         {
             ObservableCollection<PersonVM> personList;
             try
             {
-                personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-                Person p = new Person();
-                PersonVM newPerson = Mapper.MapToDestination(p);
+                PersonVM newPerson = Mapper.MapToDestination(new Person());
 
+                personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
                 personList.Add(newPerson);
 
                 SetIt<PersonVM>(newPerson, "SelectedPerson");
                 OnGridNeedsRefreshing();
 
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = "Changes are saved !"
-                });
+                ShowMessage("Changes are saved !");
             }
             catch (Exception ex)
             {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
+                ShowMessage(ex.Message);
             }
         }
 
-        public RelayCommand Save => new RelayCommand(SavePerson, true);
+        private void ShowMessage(string msg)
+        {
+            SetIt(msg, "WMessage");
 
-        private void SavePerson()
+            // TODO: How can we reset the value automatically?
+            SetIt<string>(null, "WMessage");
+        }
+
+        public RelayCommand Save => new RelayCommand(SavePerson);
+
+        private void SavePerson(object o)
         {
             try
             {
-                ObservableCollection<PersonVM> personList;
-                personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+                ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
 
                 PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
                 Person unMapped = GetUnMappedPerson(selectedPerson);
-                //Person unMapped = personList.FirstOrDefault((x) => x.GetIt<int>("Id") == unMapped.Id);
 
-                //bool newP = unMapped.Id == 0;
-
-                _business.Update(unMapped);
-
-
-                //if(TryGetListSource("PersonList", typeof(ObservableCollection<PersonVM>), out IListSource listSource))
-                //{
-                //    personList = (ObservableCollection<PersonVM>) listSource.GetList();
-                //    PersonVM person = personList.FirstOrDefault((x) => x.GetIt<int>("Id") == unMapped.Id);
-
-                //    Person unMapped = GetUnMappedPerson(selectedPerson);
-                //    bool newP = unMapped.Id == 0;
-
-                //    _business.Update(unMapped);
-                //}
+                Business business = GetIt<Business>("Business");
+                business.Update(unMapped);
 
                 OnGridNeedsRefreshing();
 
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = "Changes are saved !"
-                });
-
+                ShowMessage("Changes are saved !");
             }
             catch (Exception ex)
             {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
+                ShowMessage(ex.Message);
             }
         }
 
-        public RelayCommand Delete => new RelayCommand(DeletePerson, true);
+        public RelayCommand Delete => new RelayCommand(DeletePerson);
 
-        private void DeletePerson()
+        private void DeletePerson(object o)
         {
             PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
 
             if (selectedPerson == null) return;
 
             Person unMapped = GetUnMappedPerson(selectedPerson);
-            _business.Delete(unMapped);
 
-            if (selectedPerson != null)
-                {
-                ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-                personList.Remove(selectedPerson);
+            Business business = GetIt<Business>("Business");
+            business.Delete(unMapped);
 
-                //if (TryGetListSource("PersonList", typeof(ObservableCollection<PersonVM>), out IListSource listSource))
-                //{
-                //    ObservableCollection<PersonVM> personList = (ObservableCollection<PersonVM>)listSource.GetList();
-                //    personList.Remove(selectedPerson);
-                //}
+            ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+            personList.Remove(selectedPerson);
 
-                OnGridNeedsRefreshing();
+            OnGridNeedsRefreshing();
 
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = "Selected Person has been removed!"
-                });
-
-           }
+            ShowMessage("Selected Person has been removed!");
         }
 
         private void OnGridNeedsRefreshing()
@@ -173,9 +181,9 @@ namespace MVVMApplication.ViewModel
             GridNeedsRefreshing?.Invoke(this, new EventArgs());
         }
 
-        #region PropBag Support
+        #region AutoMapper Support
 
-        private readonly string PERSON_INSTANCE_KEY = "PersonVM";
+        private string PersonVM_MapperRequest_Key = "PersonVM_Mapper";
 
         private IPropBagMapper<Person, PersonVM> _mapper;
         private IPropBagMapper<Person, PersonVM> Mapper
@@ -184,16 +192,9 @@ namespace MVVMApplication.ViewModel
             {
                 if (_mapper == null)
                 {
-                    IPropBagMapperKey<Person, PersonVM> mapperRequest
-                        = JustSayNo.AutoMapperProvider.RegisterMapperRequest<Person, PersonVM>
-                         (
-                             PERSON_INSTANCE_KEY,
-                            typeof(PersonVM),
-                            configPackageName: "Extra_Members", // "Emit_Proxy",
-                            propFactory: null);
-
-                    _mapper = JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
-
+                    DRM.PropBag.ControlModel.MapperRequest mr = JustSayNo.PropModelProvider.GetMapperRequest(PersonVM_MapperRequest_Key);
+                    IPropBagMapperKeyGen mapperRequest = JustSayNo.AutoMapperProvider.RegisterMapperRequest(mr);
+                    _mapper = (IPropBagMapper<Person, PersonVM>) JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
                 }
                 return _mapper;
             }
@@ -201,92 +202,24 @@ namespace MVVMApplication.ViewModel
 
         private Person GetUnMappedPerson(PersonVM mappedPerson)
         {
-            if (Mapper == null) return null;
+            Person result;
+            if(mappedPerson != null)
+            {
+                result = Mapper?.MapToSource(mappedPerson);
+            }
+            else
+            {
+                result = null;
+            }
+            //if (mappedPerson == null) return null;
 
-            if (mappedPerson == null) return null;
-            return Mapper.MapToSource(mappedPerson, new Person());
+            //if (Mapper == null) return null;
 
-            //return new Person()
-            //{
-            //    FirstName = mappedPerson.GetIt<string>("FirstName"),
-            //    LastName = mappedPerson.GetIt<string>("LastName"),
-            //    CityOfResidence = mappedPerson.GetIt<string>("CityOfResidence"),
-            //    Profession = mappedPerson.GetIt<Profession>("Profession"),
-            //    Id = mappedPerson.GetIt<int>("Id")
-            //};
+            //Person result = Mapper.MapToSource(mappedPerson);
+
+            return result;
         }
 
         #endregion
-
-        #region Unused
-
-        //private void PersonCollectionViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        //{
-        //    string ss = e.PropertyName;
-        //    //this.OnPropertyChanged("SelectedPerson");
-        //}
-
-        //private void PersonCollectionViewModel_SelectedPersonChanged(object sender, DRM.TypeSafePropertyBag.PropertyChangedWithTValsEventArgs<PersonVM> e)
-        //{
-        //    //base.OnPropertyChanged("SelectedPerson2");
-        //    System.Diagnostics.Debug.WriteLine("The SelectedPersonChanged event was raised.");
-        //}
-
-        //IProp<PersonListC> _personListCached;
-        //private IProp<PersonListC> PersonListCached
-        //{
-        //    get
-        //    {
-        //        if(_personListCached == null)
-        //        {
-        //            _personListCached = base.GetTypedProp<PersonListC>("PersonList");
-        //        }
-        //        return _personListCached;
-        //    }
-        //}
-        //private PersonListC PList
-        //{
-        //    get
-        //    {
-        //        return PersonListCached.TypedValue;
-        //        //return base.GetIt<PersonListC>("PesonList");
-        //    }
-        //    set
-        //    {
-        //        PersonListCached.TypedValue = value;
-        //    }
-        //}
-
-        //PersonVM _sel;
-        //public PersonVM SelectedPerson2
-        //{
-        //    get
-        //    {
-        //        //return _sel;
-        //        return base.GetIt<PersonVM>("SelectedPerson");
-        //    }
-        //    set
-        //    {
-        //        //_sel = value;
-        //        base.SetIt<PersonVM>(value, "SelectedPerson");
-        //        //base.OnPropertyChanged("SelectedPerson2");
-        //    }
-        //}
-
-
-        //public event PropertyChangedWithTValsHandler<PersonVM> SelectedPersonChanged
-        //{
-        //    add
-        //    {
-        //        AddToPropChanged<PersonVM>(value, nameof(SelectedPersonChanged));
-        //    }
-        //    remove
-        //    {
-        //        RemoveFromPropChanged<PersonVM>(value, nameof(SelectedPersonChanged));
-        //    }
-        //}
-
-        #endregion
-
     }
 }

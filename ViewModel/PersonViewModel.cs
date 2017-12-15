@@ -2,25 +2,42 @@
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using MVVMApplication.Infra;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace MVVMApplication.ViewModel
 {
-    public class PersonVM : PropBag
+    public class PersonVM : PropBag, ICloneable
     {
-        PropModel _pm;
-
-        public PersonVM()
+        public PersonVM(PropModel pm, string fullClassName, IPropFactory propFactory)
+            : base(pm, fullClassName, propFactory)
         {
-            System.Diagnostics.Debug.WriteLine("Constructing PersonViewModel -- no Params.");
         }
 
-        // TODO: Fix this
-        // Either build a universal Type Resolver
-        // or better yet, have GetVal and SetVal use Types instead of strings to indentify the Type.
-        public PersonVM(PropModel pm, string fullClassName, IPropFactory propFactory) : base(pm, fullClassName, propFactory)
+        private PersonVM(PersonVM copySource)
+            : base(copySource)
         {
-            // Save a reference to the model used to define our properties.
-            _pm = pm;
+        }
+
+        new public object Clone()
+        {
+            return new PersonVM(this);
+        }
+
+        public override string ToString()
+        {
+            IDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
+
+            StringBuilder result = new StringBuilder();
+            int cnt = 0;
+            foreach(KeyValuePair<string, ValPlusType> kvp in x)
+            {
+                if(cnt++  == 0) result.Append("\n\r");
+
+                result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
+            }
+            return result.ToString();
         }
     }
 

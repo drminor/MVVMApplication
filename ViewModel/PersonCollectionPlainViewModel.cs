@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.Collections;
+﻿using DRM.PropBag.ControlsWPF;
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
 using System;
@@ -8,7 +8,7 @@ namespace MVVMApplication.ViewModel
 {
     public class PersonCollectionPlainViewModel : NotificationClass
     {
-        public EventHandler ShowMessageBox = delegate { };
+        public event EventHandler MessageHasArrived;
 
         Business _business;
 
@@ -25,14 +25,6 @@ namespace MVVMApplication.ViewModel
             {
                 PersonCollection = new ObservableCollection<Person>(business.Get());
             }
-            //if (SettingsExtensions.InDesignMode())
-            //{
-            //    PersonCollection = new PbCollection<Person>();
-            //}
-            //else
-            //{
-            //    PersonCollection = new PbCollection<Person>(business.Get());
-            //}
         }
 
         private ObservableCollection<Person> personCollection;
@@ -45,17 +37,6 @@ namespace MVVMApplication.ViewModel
                 OnPropertyChanged(nameof(PersonCollection));
             }
         }
-
-        //private PbCollection<Person> personCollection;
-        //public PbCollection<Person> PersonCollection
-        //{
-        //    get { return personCollection; }
-        //    set
-        //    {
-        //        personCollection = value;
-        //        OnPropertyChanged(nameof(PersonCollection));
-        //    }
-        //}
 
         private Person _person;
         public Person SelectedPerson
@@ -75,7 +56,7 @@ namespace MVVMApplication.ViewModel
         {
             get
             {
-                var x = new RelayCommand(AddPerson, true);
+                var x = new RelayCommand(AddPerson);
                 x.CanExecuteChanged += X_CanExecuteChanged;
                 return x;
 
@@ -87,7 +68,7 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("The state of 'CanExecute' has changed for the Add command.");
         }
 
-        private void AddPerson()
+        private void AddPerson(object o)
         {
             try
             {
@@ -96,10 +77,7 @@ namespace MVVMApplication.ViewModel
             }
             catch (Exception ex)
             {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
+                ShowMessage(ex.Message);
             }
         }
 
@@ -107,28 +85,23 @@ namespace MVVMApplication.ViewModel
         {
             get
             {
-                return new RelayCommand(SavePerson, true);
+                return new RelayCommand(SavePerson);
             }
         }
 
-        private void SavePerson()
+        private void SavePerson(object o)
         {
             try
             {
                 _business.Update(SelectedPerson);
                 OnPropertyChanged(nameof(PersonCollection));
 
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = "Changes are saved !"
-                });
+                ShowMessage("Changes are saved !");
+
             }
             catch (Exception ex)
             {
-                ShowMessageBox(this, new MessageEventArgs()
-                {
-                    Message = ex.Message
-                });
+                ShowMessage(ex.Message);
             }
 
         }
@@ -137,14 +110,19 @@ namespace MVVMApplication.ViewModel
         {
             get
             {
-                return new RelayCommand(DeletePerson, true);
+                return new RelayCommand(DeletePerson);
             }
         }
 
-        private void DeletePerson()
+        private void DeletePerson(object o)
         {
             _business.Delete(SelectedPerson);
             OnPropertyChanged(nameof(PersonCollection));
+        }
+
+        private void ShowMessage(string msg)
+        {
+            MessageHasArrived?.Invoke(this, new MessageEventArgs(msg));
         }
     }
 }

@@ -2,14 +2,16 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
                     xmlns:mod="clr-namespace:MVVMApplication.Model"
-                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls">
+                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <pb:PropBagTemplate x:Key="PersonCollectionVM"
-                ClassName="PersonCollectionViewModel"
+                        ClassName="PersonCollectionViewModel"
                         DeriveFromClassMode="Custom"
-                TargetType="{x:Type vmod:PersonCollectionViewModel}"        
-                TypeSafetyMode="Tight"
-                OutPutNameSpace="MVVMApplication.ViewModel">
+                        TargetType="{x:Type vmod:PersonCollectionViewModel}"
+                        TypeSafetyMode="Tight"
+                        OutPutNameSpace="MVVMApplication.ViewModel">
+        
         <pb:PropBagTemplate.Namespaces>
             <pb:NamespaceItem Namespace="MVVMApplication.Infra"/>
             <pb:NamespaceItem Namespace="MVVMApplication.Model"/>
@@ -17,20 +19,34 @@
 
         <pb:PropBagTemplate.Props>
 
+            <pb:PropItem PropertyName="Business" PropertyType="{x:Type mod:Business}">
+                <pb:InitialValueField SetToNull="True"/>
+                <pb:PropDoWhenChangedField
+                    MethodIsLocal="True"
+                    DeclaringType="{x:Type vmod:PersonCollectionViewModel}"
+                    MethodName="DoWhenBusinessChanges"
+                    DoAfterNotify="False"/>
+                <pb:PropBinderField Path="../Business"/>
+            </pb:PropItem>
+            
             <pb:PropItem PropertyName="PersonList" PropKind="Collection">
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropTypeInfoField CollectionType="ObservableCollection">
-                    <pb:PropTypeInfoCollection>
-                        <pb:PropTypeInfoField PropertyType="vmod:PersonVM"/>
-                    </pb:PropTypeInfoCollection>
-                </pb:PropTypeInfoField>
+                <pb:TypeInfoField CollectionType="ObservableCollection" TypeParameter1="{x:Type vmod:PersonVM}"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="SelectedPerson" PropertyType="vmod:PersonVM">
                 <pb:InitialValueField SetToDefault="True"/>
             </pb:PropItem>
 
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}">
+                <pb:InitialValueField SetToNull="True"/>
+            </pb:PropItem>
+
         </pb:PropBagTemplate.Props>
     </pb:PropBagTemplate>
+
+    <!--<pb:PropDoWhenChangedField 
+                    DoWhenChangedAction="MVVMApplication.Model.Business|MVVMApplication.ViewModel.PersonCollectionViewModel|DoWhenBusinessChanges"
+                    DoAfterNotify="False"/>-->
 
 </ResourceDictionary>

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MVVMApplication.Model
 {
@@ -11,14 +9,26 @@ namespace MVVMApplication.Model
         PersonDB _dbContext = null;
         public Business()
         {
-            AppDomain.CurrentDomain.SetData("DataDirectory",
-             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+            string dataDirPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            AppDomain.CurrentDomain.SetData("DataDirectory", dataDirPath);
+
+            //AppDomain.CurrentDomain.SetData("DataDirectory",
+            // Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
             _dbContext = new PersonDB();
         }
 
-        internal IEnumerable<Person> Get()
+        internal IEnumerable<Person> Get(int top = -1)
         {
-            return _dbContext.Person.ToList();
+            IEnumerable<Person> result;
+            if(top != -1)
+            {
+                result = _dbContext.Person.Take(top).ToList();
+            }
+            else
+            {
+                result = _dbContext.Person.ToList();
+            }
+            return result;
         }
 
         internal void Delete(Person personToDelete)

@@ -11,14 +11,12 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
 
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="725">
-    
-    <!--<Window.DataContext>
-        <vmod:MainWindowViewModel></vmod:MainWindowViewModel>
-    </Window.DataContext>-->
+        Title="MainWindow" Height="350" Width="725" Closed="Window_Closed">
 
     <Window.Resources>
-        <ObjectDataProvider x:Key="myDataSource" ObjectType="{x:Type infra:DataContextProvider}" MethodName="GetData">
+        <ObjectDataProvider x:Key="myDataSource"
+                            ObjectType="{x:Type infra:DataContextProvider}"
+                            MethodName="GetData">
             <ObjectDataProvider.ConstructorParameters>
                 <sys:String>MainWindowVM</sys:String>
             </ObjectDataProvider.ConstructorParameters>
@@ -29,17 +27,9 @@
         <Binding Source="{StaticResource myDataSource}"/>
     </Window.DataContext>
 
-
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition></RowDefinition>
-            <!--<RowDefinition Height="35"></RowDefinition>-->
-        </Grid.RowDefinitions>
-        <view:PersonCollection Grid.Row="0" x:Name="pcGrid"
+        <view:PersonCollection 
                 DataContext="{pbb:Binding PersonCollectionVM, SourceType={x:Type vmod:PersonCollectionViewModel}}">
         </view:PersonCollection>
-        <!--<Grid Grid.Row="1">
-            <Button Name="Refresh" Width="100" Height="25" Content="Refresh" Click="Refresh_Click"></Button>
-        </Grid>-->
     </Grid>
 </Window>

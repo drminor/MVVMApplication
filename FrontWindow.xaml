@@ -6,15 +6,16 @@
         xmlns:local="clr-namespace:MVVMApplication"
         mc:Ignorable="d"
         Title="FrontWindow" Height="300" Width="300">
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        
-        <Button Name="btnPlain" Content="Plain" Grid.Row="0" HorizontalAlignment="Left" Margin="81,41,0,0" VerticalAlignment="Top" Width="137" Height="46" Click="Plain_Click" />
 
-        <Button Name="btnPropBagProxyEmit" Content="PropBag (Emit Proxy)" Grid.Row="1" HorizontalAlignment="Left" Margin="81,57,0,0" VerticalAlignment="Top" Width="137" Height="46" Click="PropBagProxyEmit_Click"/>
+        <Button Name="btnPlain"  Grid.Row="0" Content="Plain" HorizontalAlignment="Left" Margin="81,41,0,0" VerticalAlignment="Top" Width="137" Height="46" Click="Plain_Click" />
+
+        <Button Name="btnPropBagProxyEmit" Grid.Row="1" Content="PropBag (Emit Proxy)"  HorizontalAlignment="Left" Margin="81,57,0,0" VerticalAlignment="Top" Width="137" Height="46" Click="PropBagProxyEmit_Click"/>
 
     </Grid>
 </Window>

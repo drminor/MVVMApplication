@@ -1,5 +1,4 @@
-﻿using MVVMApplication.Infra;
-
+﻿
 namespace MVVMApplication.Model
 {
     public class Person
@@ -11,5 +10,15 @@ namespace MVVMApplication.Model
         public Profession Profession { get; set; }
     }
 
-  
+    public enum Profession
+    {
+        Default = -1,
+        Doctor,
+        SoftwareEngineer,
+        Student,
+        SportsPerson,
+        Other
+    }
+
+
 }

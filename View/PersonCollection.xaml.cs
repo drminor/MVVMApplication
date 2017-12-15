@@ -5,25 +5,8 @@ using System.Windows.Data;
 
 namespace MVVMApplication.View
 {
-    /// <summary>
-    /// Interaction logic for PersonCollection.xaml
-    /// </summary>
     public partial class PersonCollection : UserControl
     {
-
-        //public object Dc
-        //{
-        //    get
-        //    {
-        //        return this.DataContext;
-        //    }
-        //    set
-        //    {
-        //        this.DataContext = value;
-        //    }
-
-        //}
-
         public PersonCollection()
         {
             InitializeComponent();
@@ -39,39 +22,12 @@ namespace MVVMApplication.View
 
         private void PersonCollection_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if(this.DataContext is PersonCollectionViewModel pcvm)
-            {
-                pcvm.GridNeedsRefreshing += Pcvm_GridNeedsRefreshing;
-
-                CollectionViewSource cvs = Cv;
-                CollectionView x = (CollectionView)CollectionViewSource.GetDefaultView(cvs.Source);
-            }
-        }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
             if (this.DataContext is PersonCollectionViewModel pcvm)
             {
                 pcvm.GridNeedsRefreshing += Pcvm_GridNeedsRefreshing;
-                CollectionViewSource cvs = Cv;
-
-                CollectionView x = (CollectionView) CollectionViewSource.GetDefaultView(cvs.Source);
-
-                //pcvm.TheView = Cv;
             }
         }
 
-        public CollectionViewSource Cv
-        {
-            get
-            {
-                CollectionViewSource collectionViewSource = (CollectionViewSource)this.Resources["cvsPersonList"];
 
-                //ICollectionView cv = collectionViewSource.View;
-
-                return collectionViewSource;
-            }
-        }
- 
     }
 }

@@ -3,15 +3,20 @@ using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.TypeSafePropertyBag;
+using DRM.ViewModelTools;
 using System;
 using System.ComponentModel;
 using System.Windows;
 
 namespace MVVMApplication.Infra
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+
     public class AutoMapperHelpers
     {
-        public AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
+        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider(wrapperTypeCreator: null, viewModelActivator: null);
@@ -20,7 +25,7 @@ namespace MVVMApplication.Infra
 
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
 
-            AutoMapperProvider autoMapperProvider = new AutoMapperProvider
+            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
@@ -33,30 +38,57 @@ namespace MVVMApplication.Infra
     }
 
     // TODO: Fix this!!
-    public static class JustSayNo // To using Static-based config providers.
+    public static class JustSayNo // JustSayNo to using Static-based config providers.
     {
-        public static PropModelProvider PropModelProvider { get; }
+        public static IPropModelProvider PropModelProvider { get; }
         public static ViewModelHelper ViewModelHelper { get; }
-        public static AutoMapperProvider AutoMapperProvider { get; }
+        public static SimpleAutoMapperProvider AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
+
+        public static PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
 
         static JustSayNo() 
         {
+            PropStoreAccessServiceProvider =  GetNewSimplePropStoreAccessServiceProvider();
+
             ThePropFactory = new PropFactory
                 (
-                    //returnDefaultForUndefined: false,
+                    propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
                     typeResolver: GetTypeFromName,
                     valueConverter: null
                 );
 
-            IPropBagTemplateProvider propBagTemplateProvider
-                = new PropBagTemplateProvider(Application.Current.Resources);
+            //ThePropFactory = GetPropFactory<PropBagT, PropDataT>(PropStoreAccessServiceProvider);
 
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory);
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider);
+            IViewModelActivator vmActivator = new SimpleViewModelActivator();
+            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory, vmActivator);
+
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator);
 
             AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider);
+        }
+
+        //public static IPropFactory GetPropFactory(IProvidePropStoreAccessService<PropBagT, PropDataT> propStoreAccessServiceProvider)
+
+        //{
+        //    IPropFactory result = new PropFactory(propStoreAccessServiceProvider: propStoreAccessServiceProvider,
+        //            /*returnDefaultForUndefined: false,*/ typeResolver: GetTypeFromName, valueConverter: null);
+
+        //    return result;
+        //}
+
+        public static IProvidePropStoreAccessService<PropIdType, PropNameType> GetNewSimplePropStoreAccessServiceProvider()
+        {
+            int MAX_NUMBER_OF_PROPERTIES = 65536;
+
+            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+
+            IProvidePropStoreAccessService<PropIdType, PropNameType> result = 
+                new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+
+            return result;
         }
 
         public static Type GetTypeFromName(string typeName)
@@ -77,6 +109,11 @@ namespace MVVMApplication.Infra
             }
 
             return result;
+        }
+
+        private static void XX()
+        {
+
         }
 
         #region InDesign Support

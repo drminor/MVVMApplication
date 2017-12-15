@@ -44,9 +44,10 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        
+
+        <!--ItemsSource="{pbb:Binding PersonCollection, SourceType={x:Type mod:PersonListC}}"-->
         <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="True" Width="550"
-                  ItemsSource="{pbb:Binding PersonCollection, SourceType={x:Type mod:PersonListC}}"
+
             SelectedItem="{pbb:Binding SelectedPerson, SourceType={x:Type mod:Person}, Mode=TwoWay}">
         </DataGrid>
 

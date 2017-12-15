@@ -10,8 +10,9 @@
             xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
             xmlns:mod="clr-namespace:MVVMApplication.Model"
             mc:Ignorable="d" 
-            d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
-    
+            d:DesignHeight="300" d:DesignWidth="300" >
+
+    <!--Loaded="UserControl_Loaded"-->
     <UserControl.Resources>
         <Style TargetType="TextBlock">
             <Style.Setters>
@@ -36,7 +37,7 @@
 
         <ObjectDataProvider x:Key="professionEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="Infra:Profession"/>
+                <x:Type TypeName="mod:Profession"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
@@ -50,10 +51,13 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        
+
+        <!--SelectedItem="{pbb:Binding SelectedPerson, SourceType={x:Type vmod:PersonVM}, Mode=TwoWay}"-->
+        <!--SelectedItem="{Binding Path=[MVVMApplication.ViewModel.PersonVM\, SelectedPerson], Mode=OneWayToSource}"-->
+
         <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="450"
                   ItemsSource="{Binding Source={StaticResource cvsPersonList}}"
-                  SelectedItem="{pbb:Binding SelectedPerson, SourceType={x:Type vmod:PersonVM}, Mode=TwoWay}">
+                    SelectedItem="{pbb:Binding SelectedPerson, SourceType={x:Type vmod:PersonVM}, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Path=FirstName}" Header="FirstName" Width="100"/>
                 <DataGridTextColumn Binding="{Binding LastName}" Header="LastName" Width="120"/>
@@ -62,7 +66,10 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{pbb:Binding SelectedPerson, SourceType={x:Type vmod:PersonVM}, Mode=TwoWay}" >
+        <!--DataContext="{pbb:Binding SelectedPerson, SourceType={x:Type vmod:PersonVM}, Mode=TwoWay}"-->
+        <!--DataContext="{Binding Path=[MVVMApplication.ViewModel.PersonVM\, SelectedPerson], Mode=OneWay}"-->
+
+        <Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{Binding Path=/, Source={StaticResource cvsPersonList}, Mode=OneWay}" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>

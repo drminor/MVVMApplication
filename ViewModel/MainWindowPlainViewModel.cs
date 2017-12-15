@@ -23,7 +23,7 @@ namespace MVVMApplication.ViewModel
 
             PersonCollectionPlainViewModel = new PersonCollectionPlainViewModel(_business);
 
-            personCollectionPlainViewModel.ShowMessageBox += delegate (object sender, EventArgs args)
+            personCollectionPlainViewModel.MessageHasArrived += delegate (object sender, EventArgs args)
             {
                 // Pass messages from the child view model to our listeners (i.e., our parent window.)
                 ShowMessageBox(sender, args);

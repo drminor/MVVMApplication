@@ -67,9 +67,8 @@
       <DependentUpon>FrontWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Infra\AutoMapperHelpers.cs" />
+    <Compile Include="Infra\MessageEventArgs.cs" />
     <Compile Include="Infra\NotificationClass.cs" />
-    <Compile Include="Infra\RelayCommand.cs" />
-    <Compile Include="Infra\Utility.cs" />
     <Compile Include="Infra\DataContextProvider.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModel\PersonCollectionPlainViewModel.cs" />
@@ -79,7 +78,6 @@
     <Compile Include="Model\Business.cs" />
     <Compile Include="Model\Person.cs" />
     <Compile Include="Model\PersonDB.cs" />
-    <Compile Include="Model\PersonListC.cs" />
     <Compile Include="ViewModel\MainWindowPlainViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\PersonCollectionViewModel.cs" />
