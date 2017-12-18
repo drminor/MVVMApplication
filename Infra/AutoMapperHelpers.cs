@@ -1,11 +1,15 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
+using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using System.Windows;
 
 namespace MVVMApplication.Infra
@@ -47,13 +51,18 @@ namespace MVVMApplication.Infra
 
         public static PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
 
+        public static string PackageConfigName { get; set; }
+
         static JustSayNo() 
         {
             PropStoreAccessServiceProvider =  GetNewSimplePropStoreAccessServiceProvider();
 
-            ThePropFactory = new PropFactory
+            //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
+
+            ThePropFactory = new WPFPropFactory
                 (
                     propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
+                    //delegateCacheProvider: delegateCacheProvider,
                     typeResolver: GetTypeFromName,
                     valueConverter: null
                 );
@@ -91,29 +100,62 @@ namespace MVVMApplication.Infra
             return result;
         }
 
+        //if (typeName.ToLower().EndsWith("listcollectionview"))
+        //{
+        //    System.Windows.Data.ListCollectionView listCollectionView = new System.Windows.Data.ListCollectionView(new List<string>());
+        //    result = listCollectionView.GetType();
+        //}
+        //else
+        //{
+        //    throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
+        //}
+
         public static Type GetTypeFromName(string typeName)
         {
-            Type result;
-            try
-            {
-                result = Type.GetType(typeName);
-            }
-            catch (System.Exception e)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
-            }
-
-            if (result == null)
+            if (!TryFindType(typeName, out Type result))
             {
                 throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
             }
-
             return result;
         }
 
-        private static void XX()
-        {
+        static Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
 
+        public static bool TryFindType(string typeName, out Type t)
+        {
+            lock (typeCache)
+            {
+                if (!typeCache.TryGetValue(typeName, out t))
+                {
+                    try
+                    {
+                        t = Type.GetType(typeName);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
+                    }
+
+                    if (t == null)
+                    {
+                        foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+                        {
+                            try
+                            {
+                                t = a.GetType(typeName);
+                                if (t != null)
+                                    break;
+                            }
+                            catch (Exception e)
+                            {
+                                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
+                            }
+                        }
+                    }
+                    typeCache[typeName] = t; // perhaps null
+                }
+            }
+            return t != null;
         }
 
         #region InDesign Support

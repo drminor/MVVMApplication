@@ -18,10 +18,17 @@ namespace MVVMApplication
 
         private void PropBagProxyEmit_Click(object sender, RoutedEventArgs e)
         {
-            //Class1 test = new Class1();
-            //test.MapOcAndCleanUp();
+            ShowMain("Emit_Proxy");
+        }
 
-            MainWindow mw = new MainWindow();
+        private void PropBagExtraMembers_Click(object sender, RoutedEventArgs e)
+        {
+            ShowMain("Extra_Members");
+        }
+
+        private void ShowMain(string packageConfigName)
+        {
+            MainWindow mw = new MainWindow(packageConfigName);
             mw.ShowDialog();
         }
 

@@ -10,12 +10,16 @@ using MVVMApplication.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Data;
 
 namespace MVVMApplication.ViewModel
 {
     public partial class PersonCollectionViewModel : PropBag
     {
         public event EventHandler GridNeedsRefreshing;
+
+        ObservableCollection<PersonVM> _mappedPeople;
+        //CollectionViewSource _cvs;
 
         public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
             : base(pm, fullClassName, propFactory)
@@ -58,20 +62,61 @@ namespace MVVMApplication.ViewModel
         //    }
         //}
 
+        public CollectionViewSource CVS = new CollectionViewSource();
+
+        public ListCollectionView PersonCollectionView
+        {
+            get
+            {
+                ListCollectionView result = GetIt<ListCollectionView>("PersonListView");
+                return result;
+            }
+            set
+            {
+                SetIt(value, "PersonListView");
+            }
+        }
+
+        private PersonVM TheSelectedPerson
+        {
+            get
+            {
+                ListCollectionView cv = PersonCollectionView;
+                if(cv != null)
+                {
+                    return (PersonVM) cv.CurrentItem;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public void FetchData(Business business)
         {
             // Get List of people for this business.
-            ObservableCollection<PersonVM> mappedPeople = GetMappedPeople(business);
+            _mappedPeople = GetMappedPeople(business);
 
             // Set our PersonList property.
-            SetIt(mappedPeople, "PersonList");
+            //SetIt(mappedPeople, "PersonList");
 
-            // Set the selected person the first item.
-            if (mappedPeople != null && mappedPeople.Count > 0)
-            {
-                PersonVM personVM = mappedPeople[0];
+            //CVS.Source = _mappedPeople;
+            //PersonCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(cvs);
+
+            PersonCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(_mappedPeople);
+            PersonCollectionView.MoveCurrentToNext();
+
+            PersonVM personVM = TheSelectedPerson;
+            if(personVM != null)
                 SetIt(personVM, "SelectedPerson");
-            }
+
+            //// Set the selected person the first item.
+            //if (_mappedPeople != null && _mappedPeople.Count > 0)
+            //{
+            //    PersonVM personVM = TheSelectedPerson;
+            //    SetIt(personVM, "SelectedPerson");
+            //}
         }
 
         private ObservableCollection<PersonVM> GetMappedPeople(Business business)
@@ -104,18 +149,22 @@ namespace MVVMApplication.ViewModel
 
         private void AddPerson(object o)
         {
-            ObservableCollection<PersonVM> personList;
+            //ObservableCollection<PersonVM> personList;
             try
             {
                 PersonVM newPerson = Mapper.MapToDestination(new Person());
 
-                personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-                personList.Add(newPerson);
+                PersonCollectionView.AddNewItem(newPerson);
 
-                SetIt<PersonVM>(newPerson, "SelectedPerson");
-                OnGridNeedsRefreshing();
+                //personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+                //personList.Add(newPerson);
 
-                ShowMessage("Changes are saved !");
+                //PersonCollectionView.MoveCurrentTo(newPerson);
+
+                //SetIt<PersonVM>(newPerson, "SelectedPerson");
+                //OnGridNeedsRefreshing();
+
+                //ShowMessage("Changes are saved !");
             }
             catch (Exception ex)
             {
@@ -137,15 +186,26 @@ namespace MVVMApplication.ViewModel
         {
             try
             {
-                ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+                //ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
 
-                PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
+                ////PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
+
+                //PersonVM selectedPerson = (PersonVM) PersonCollectionView.CurrentItem;
+
+                PersonVM selectedPerson = TheSelectedPerson;
+
+                //PersonVM personVmAlt = GetIt<PersonVM>("SelectedPerson");
+
+                //bool theSame = ReferenceEquals(selectedPerson, personVmAlt);
+
+                //bool theSame2 = int.Equals(selectedPerson.GetIt<int>("Id"), personVmAlt.GetIt<int>("Id"));
+
                 Person unMapped = GetUnMappedPerson(selectedPerson);
 
                 Business business = GetIt<Business>("Business");
                 business.Update(unMapped);
 
-                OnGridNeedsRefreshing();
+                //OnGridNeedsRefreshing();
 
                 ShowMessage("Changes are saved !");
             }
@@ -159,7 +219,10 @@ namespace MVVMApplication.ViewModel
 
         private void DeletePerson(object o)
         {
-            PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
+            //PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
+            //PersonVM selectedPerson = (PersonVM)PersonCollectionView.CurrentItem;
+
+            PersonVM selectedPerson = TheSelectedPerson;
 
             if (selectedPerson == null) return;
 
@@ -168,10 +231,12 @@ namespace MVVMApplication.ViewModel
             Business business = GetIt<Business>("Business");
             business.Delete(unMapped);
 
-            ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-            personList.Remove(selectedPerson);
+            PersonCollectionView.Remove(selectedPerson);
 
-            OnGridNeedsRefreshing();
+            //ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
+            //personList.Remove(selectedPerson);
+
+            //OnGridNeedsRefreshing();
 
             ShowMessage("Selected Person has been removed!");
         }
@@ -183,7 +248,7 @@ namespace MVVMApplication.ViewModel
 
         #region AutoMapper Support
 
-        private string PersonVM_MapperRequest_Key = "PersonVM_Mapper";
+        //private string PersonVM_MapperRequest_Key = "PersonVM_Mapper";
 
         private IPropBagMapper<Person, PersonVM> _mapper;
         private IPropBagMapper<Person, PersonVM> Mapper
@@ -192,12 +257,31 @@ namespace MVVMApplication.ViewModel
             {
                 if (_mapper == null)
                 {
-                    DRM.PropBag.ControlModel.MapperRequest mr = JustSayNo.PropModelProvider.GetMapperRequest(PersonVM_MapperRequest_Key);
+                    string resourceKey = GetMapperRequestKey();
+
+                    System.Diagnostics.Debug.WriteLine($"Creating PersonVM Mapper using {resourceKey}.");
+
+                    DRM.PropBag.ControlModel.MapperRequest mr = JustSayNo.PropModelProvider.GetMapperRequest(resourceKey);
                     IPropBagMapperKeyGen mapperRequest = JustSayNo.AutoMapperProvider.RegisterMapperRequest(mr);
                     _mapper = (IPropBagMapper<Person, PersonVM>) JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
                 }
                 return _mapper;
             }
+        }
+
+        private string GetMapperRequestKey()
+        {
+            string result;
+            string packageConfigName = JustSayNo.PackageConfigName;
+            if(packageConfigName == "Emit_Proxy")
+            {
+                result = "PersonVM_Mapper_Emit_Proxy";
+            }
+            else
+            {
+                result = "PersonVM_Mapper_Extra_Members";
+            }
+            return result;
         }
 
         private Person GetUnMappedPerson(PersonVM mappedPerson)

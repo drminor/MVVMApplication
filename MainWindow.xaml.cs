@@ -1,6 +1,8 @@
 ﻿using DRM.TypeSafePropertyBag;
+using MVVMApplication.Infra;
 using MVVMApplication.ViewModel;
 using System.Windows;
+using System.Windows.Data;
 
 namespace MVVMApplication
 {
@@ -8,9 +10,12 @@ namespace MVVMApplication
     {
         MainWindowViewModel OurData => (MainWindowViewModel)this.DataContext;
 
-        public MainWindow()
+        public MainWindow(string packageConfigName)
         {
             System.Diagnostics.Debug.WriteLine("Just before MainWindow InitComp.");
+
+            JustSayNo.PackageConfigName = packageConfigName;
+
             InitializeComponent();
             System.Diagnostics.Debug.WriteLine("Just afer MainWindow InitComp.");
 

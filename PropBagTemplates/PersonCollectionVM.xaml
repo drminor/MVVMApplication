@@ -29,14 +29,18 @@
                 <pb:PropBinderField Path="../Business"/>
             </pb:PropItem>
             
-            <pb:PropItem PropertyName="PersonList" PropKind="Collection">
+            <!--<pb:PropItem PropertyName="PersonList" PropKind="Collection">
                 <pb:InitialValueField SetToNull="True"/>
                 <pb:TypeInfoField CollectionType="ObservableCollection" TypeParameter1="{x:Type vmod:PersonVM}"/>
+            </pb:PropItem>-->
+
+            <pb:PropItem PropertyName="PersonListView" PropertyType="{x:Type ListCollectionView}">
+                <pb:InitialValueField SetToNull="True"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="SelectedPerson" PropertyType="vmod:PersonVM">
+            <!--<pb:PropItem PropertyName="SelectedPerson" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToDefault="True"/>
-            </pb:PropItem>
+            </pb:PropItem>-->
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}">
                 <pb:InitialValueField SetToNull="True"/>

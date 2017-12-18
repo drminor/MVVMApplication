@@ -15,7 +15,7 @@ namespace MVVMApplication.ViewModel
         {
         }
 
-        private PersonVM(PersonVM copySource)
+        protected PersonVM(PersonVM copySource)
             : base(copySource)
         {
         }

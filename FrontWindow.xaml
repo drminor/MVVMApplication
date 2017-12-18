@@ -11,11 +11,17 @@
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Button Name="btnPlain"  Grid.Row="0" Content="Plain" HorizontalAlignment="Left" Margin="81,41,0,0" VerticalAlignment="Top" Width="137" Height="46" Click="Plain_Click" />
+        <Button Name="btnPlain"  Grid.Row="0" Content="Plain"
+                HorizontalAlignment="Left" Margin="81,25,0,0" VerticalAlignment="Top" Width="160" Height="46" Click="Plain_Click" />
 
-        <Button Name="btnPropBagProxyEmit" Grid.Row="1" Content="PropBag (Emit Proxy)"  HorizontalAlignment="Left" Margin="81,57,0,0" VerticalAlignment="Top" Width="137" Height="46" Click="PropBagProxyEmit_Click"/>
+        <Button Name="btnPropBagProxyEmit" Grid.Row="1" Content="PropBag (Emit Proxy)"
+                HorizontalAlignment="Left" Margin="81,25,0,0" VerticalAlignment="Top" Width="160" Height="46" Click="PropBagProxyEmit_Click"/>
+
+        <Button Name="btnPropBagExtraMembers" Grid.Row="2" Content="PropBag (Extra Members)"
+                HorizontalAlignment="Left" Margin="81,25,0,0" VerticalAlignment="Top" Width="160" Height="46" Click="PropBagExtraMembers_Click"/>
 
     </Grid>
 </Window>
