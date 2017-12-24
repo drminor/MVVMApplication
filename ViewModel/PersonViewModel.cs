@@ -1,7 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
-using MVVMApplication.Infra;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,20 +24,20 @@ namespace MVVMApplication.ViewModel
             return new PersonVM(this);
         }
 
-        public override string ToString()
-        {
-            IDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
+        //public override string ToString()
+        //{
+        //    IDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
 
-            StringBuilder result = new StringBuilder();
-            int cnt = 0;
-            foreach(KeyValuePair<string, ValPlusType> kvp in x)
-            {
-                if(cnt++  == 0) result.Append("\n\r");
+        //    StringBuilder result = new StringBuilder();
+        //    int cnt = 0;
+        //    foreach(KeyValuePair<string, ValPlusType> kvp in x)
+        //    {
+        //        if(cnt++  == 0) result.Append("\n\r");
 
-                result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
-            }
-            return result.ToString();
-        }
+        //        result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
+        //    }
+        //    return result.ToString();
+        //}
     }
 
   

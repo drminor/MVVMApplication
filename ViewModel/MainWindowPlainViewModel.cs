@@ -6,7 +6,7 @@ namespace MVVMApplication.ViewModel
 {
     public class MainWindowPlainViewModel : NotificationClass, IDisposable
     {
-        public EventHandler ShowMessageBox = delegate { };
+        public EventHandler<MessageEventArgs> ShowMessageBox = delegate { };
 
         Business _business;
 
@@ -23,7 +23,7 @@ namespace MVVMApplication.ViewModel
 
             PersonCollectionPlainViewModel = new PersonCollectionPlainViewModel(_business);
 
-            personCollectionPlainViewModel.MessageHasArrived += delegate (object sender, EventArgs args)
+            personCollectionPlainViewModel.MessageHasArrived += delegate (object sender, MessageEventArgs args)
             {
                 // Pass messages from the child view model to our listeners (i.e., our parent window.)
                 ShowMessageBox(sender, args);

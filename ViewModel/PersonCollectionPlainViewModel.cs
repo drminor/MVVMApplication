@@ -8,7 +8,7 @@ namespace MVVMApplication.ViewModel
 {
     public class PersonCollectionPlainViewModel : NotificationClass
     {
-        public event EventHandler MessageHasArrived;
+        public event EventHandler<MessageEventArgs> MessageHasArrived;
 
         Business _business;
 

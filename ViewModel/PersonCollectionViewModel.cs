@@ -2,6 +2,7 @@
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
+using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 
 using MVVMApplication.Infra;
@@ -16,121 +17,87 @@ namespace MVVMApplication.ViewModel
 {
     public partial class PersonCollectionViewModel : PropBag
     {
-        public event EventHandler GridNeedsRefreshing;
-
-        ObservableCollection<PersonVM> _mappedPeople;
-        //CollectionViewSource _cvs;
+        Business _business;
 
         public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
             : base(pm, fullClassName, propFactory)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 
-            //// TODO: These should be part of the PropModel.
-            //bool wasAdded =  SubscribeToPropChanged(DoWhenBusinessChanges, "Business", typeof(Business));
-            //RegisterBinding<Business>("Business", "../Business");
-
-            //wasAdded = SubscribeToPropChanged(DoWhenSelectedPersonChanges, "SelectedPerson", typeof(PersonVM));
+            BuildListSource();
         }
 
-
-        private void DoWhenBusinessChanges(object sender, PcGenEventArgs e)
+        private void BuildListSource()
         {
-            System.Diagnostics.Debug.WriteLine("Business was changed.");
-            if (e.OldValue == null && e.NewValue != null)
+            //// Create a CollectionViewSource and register the property into the store.
+            //CViewProp<CollectionViewSource, PersonVM> CVS = new CViewProp<CollectionViewSource, PersonVM>(null);
+            //AddProp("CVS", CVS);
+
+            // See if we can access the new property.
+            CollectionViewSource testAccess = GetIt<CollectionViewSource>("CVS");
+            System.Diagnostics.Debug.Assert(testAccess != null, $"The CVS prop did not get added.");
+        }
+
+        #region Command Handlers
+
+        private void AddPerson(object o)
+        {
+            try
             {
-                Business business = (Business)e.NewValue;
-                FetchData(business);
+                ListCollectionView lcv = (ListCollectionView)GetIt<CollectionViewSource>("CVS").View;
+                PersonVM newPerson = Mapper.GetNewDestination();
+                lcv.AddNewItem(newPerson);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage(ex.Message);
             }
         }
 
-        //private void DoWhenSelectedPersonChanges(object sender, PcGenEventArgs e)
-        //{
-        //    System.Diagnostics.Debug.WriteLine("The selected person was changed.");
-
-        //    PersonVM old = (PersonVM) e.OldValue;
-        //    PersonVM newVal = (PersonVM)e.NewValue;
-        //}
-
-        //private void DoWhenBusinessChanges(object sender, PCTypedEventArgs<Business> e)
-        //{
-        //    System.Diagnostics.Debug.WriteLine("Business was changed.");
-        //    if(e.OldValue == null && e.NewValue != null)
-        //    {
-        //        Business business = (Business)e.NewValue;
-        //        FetchData(business);
-        //    }
-        //}
-
-        public CollectionViewSource CVS = new CollectionViewSource();
-
-        public ListCollectionView PersonCollectionView
+        private void SavePerson(object o)
         {
-            get
+            try
             {
-                ListCollectionView result = GetIt<ListCollectionView>("PersonListView");
-                return result;
+                ListCollectionView lcv = (ListCollectionView)GetIt<CollectionViewSource>("CVS").View;
+                PersonVM selectedPerson = (PersonVM)lcv.CurrentItem;
+
+                if (selectedPerson == null) return;
+
+                Person unMapped = GetUnMappedPerson(selectedPerson);
+
+                _business.Update(unMapped);
+
+                ShowMessage("Changes are saved !");
             }
-            set
+            catch (Exception ex)
             {
-                SetIt(value, "PersonListView");
+                ShowMessage(ex.Message);
             }
         }
 
-        private PersonVM TheSelectedPerson
+        private void DeletePerson(object o)
         {
-            get
-            {
-                ListCollectionView cv = PersonCollectionView;
-                if(cv != null)
-                {
-                    return (PersonVM) cv.CurrentItem;
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            ListCollectionView lcv = (ListCollectionView)GetIt<CollectionViewSource>("CVS").View;
+            PersonVM selectedPerson = (PersonVM)lcv.CurrentItem;
+
+            if (selectedPerson == null) return;
+
+            Person unMapped = GetUnMappedPerson(selectedPerson);
+
+            _business.Delete(unMapped);
+
+            ShowMessage("Selected Person has been removed!");
         }
 
-        public void FetchData(Business business)
+        private void ShowMessage(string msg)
         {
-            // Get List of people for this business.
-            _mappedPeople = GetMappedPeople(business);
-
-            // Set our PersonList property.
-            //SetIt(mappedPeople, "PersonList");
-
-            //CVS.Source = _mappedPeople;
-            //PersonCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(cvs);
-
-            PersonCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(_mappedPeople);
-            PersonCollectionView.MoveCurrentToNext();
-
-            PersonVM personVM = TheSelectedPerson;
-            if(personVM != null)
-                SetIt(personVM, "SelectedPerson");
-
-            //// Set the selected person the first item.
-            //if (_mappedPeople != null && _mappedPeople.Count > 0)
-            //{
-            //    PersonVM personVM = TheSelectedPerson;
-            //    SetIt(personVM, "SelectedPerson");
-            //}
+            string x = null;
+            SetIt<string>(msg, ref x, "WMessage");
         }
 
-        private ObservableCollection<PersonVM> GetMappedPeople(Business business)
-        {
-            var people = business.Get(10);
+        #endregion
 
-            if (Mapper == null)
-                return new ObservableCollection<PersonVM>();
-
-            IEnumerable<PersonVM> mappedPeopleRaw = Mapper.MapToDestination(people);
-
-            ObservableCollection<PersonVM> mappedPeople = new ObservableCollection<PersonVM>(mappedPeopleRaw);
-            return mappedPeople;
-        }
+        #region Command Relayers
 
         public RelayCommand Add
         {
@@ -147,108 +114,72 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("The state of 'CanExecute' has changed for the Add command.");
         }
 
-        private void AddPerson(object o)
-        {
-            //ObservableCollection<PersonVM> personList;
-            try
-            {
-                PersonVM newPerson = Mapper.MapToDestination(new Person());
-
-                PersonCollectionView.AddNewItem(newPerson);
-
-                //personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-                //personList.Add(newPerson);
-
-                //PersonCollectionView.MoveCurrentTo(newPerson);
-
-                //SetIt<PersonVM>(newPerson, "SelectedPerson");
-                //OnGridNeedsRefreshing();
-
-                //ShowMessage("Changes are saved !");
-            }
-            catch (Exception ex)
-            {
-                ShowMessage(ex.Message);
-            }
-        }
-
-        private void ShowMessage(string msg)
-        {
-            SetIt(msg, "WMessage");
-
-            // TODO: How can we reset the value automatically?
-            SetIt<string>(null, "WMessage");
-        }
-
         public RelayCommand Save => new RelayCommand(SavePerson);
-
-        private void SavePerson(object o)
-        {
-            try
-            {
-                //ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-
-                ////PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
-
-                //PersonVM selectedPerson = (PersonVM) PersonCollectionView.CurrentItem;
-
-                PersonVM selectedPerson = TheSelectedPerson;
-
-                //PersonVM personVmAlt = GetIt<PersonVM>("SelectedPerson");
-
-                //bool theSame = ReferenceEquals(selectedPerson, personVmAlt);
-
-                //bool theSame2 = int.Equals(selectedPerson.GetIt<int>("Id"), personVmAlt.GetIt<int>("Id"));
-
-                Person unMapped = GetUnMappedPerson(selectedPerson);
-
-                Business business = GetIt<Business>("Business");
-                business.Update(unMapped);
-
-                //OnGridNeedsRefreshing();
-
-                ShowMessage("Changes are saved !");
-            }
-            catch (Exception ex)
-            {
-                ShowMessage(ex.Message);
-            }
-        }
 
         public RelayCommand Delete => new RelayCommand(DeletePerson);
 
-        private void DeletePerson(object o)
+
+        #endregion
+
+        #region Event Handlers
+
+        private void DoWhenBusinessChanges(object sender, PcTypedEventArgs<Business> e)
         {
-            //PersonVM selectedPerson = GetIt<PersonVM>("SelectedPerson");
-            //PersonVM selectedPerson = (PersonVM)PersonCollectionView.CurrentItem;
+            System.Diagnostics.Debug.WriteLine("DoWhenBusinessChanges was called.");
 
-            PersonVM selectedPerson = TheSelectedPerson;
-
-            if (selectedPerson == null) return;
-
-            Person unMapped = GetUnMappedPerson(selectedPerson);
-
-            Business business = GetIt<Business>("Business");
-            business.Delete(unMapped);
-
-            PersonCollectionView.Remove(selectedPerson);
-
-            //ObservableCollection<PersonVM> personList = GetIt<ObservableCollection<PersonVM>>("PersonList");
-            //personList.Remove(selectedPerson);
-
-            //OnGridNeedsRefreshing();
-
-            ShowMessage("Selected Person has been removed!");
+            if(!e.NewValueIsUndefined && e.NewValue != _business)
+            {
+                _business = e.NewValue;
+                FetchData(_business);
+            }
+            else if(e.NewValueIsUndefined && _business != null)
+            {
+                _business = null;
+                FetchData(_business);
+            }
         }
 
-        private void OnGridNeedsRefreshing()
+        public void FetchData(Business business)
         {
-            GridNeedsRefreshing?.Invoke(this, new EventArgs());
+            // Set our PersonList property to the list of people for this business and .
+            ObservableCollection<PersonVM> mappedPeople = GetMappedPeople(business);
+            SetIt(mappedPeople, "PersonList");
+
+            // TODO: Move these three lines to the PropTemplate.
+            CollectionViewSource cvs = GetIt<CollectionViewSource>("CVS");
+            ObservableCollection<PersonVM> temp = GetIt<ObservableCollection<PersonVM>>("PersonList");
+            cvs.Source = temp;
         }
+
+        #endregion
 
         #region AutoMapper Support
 
-        //private string PersonVM_MapperRequest_Key = "PersonVM_Mapper";
+        private ObservableCollection<PersonVM> GetMappedPeople(Business business)
+        {
+            if (business == null || Mapper == null)
+                return new ObservableCollection<PersonVM>();
+
+            IEnumerable<Person> people = business.Get(10);
+            IEnumerable<PersonVM> mappedPeopleRaw = Mapper.MapToDestination(people);
+            ObservableCollection<PersonVM> mappedPeople = new ObservableCollection<PersonVM>(mappedPeopleRaw);
+            return mappedPeople;
+        }
+
+        private Person GetUnMappedPerson(PersonVM mappedPerson)
+        {
+            Person result;
+            if (mappedPerson != null)
+            {
+                result = Mapper?.MapToSource(mappedPerson);
+            }
+            else
+            {
+                result = null;
+            }
+
+            return result;
+        }
 
         private IPropBagMapper<Person, PersonVM> _mapper;
         private IPropBagMapper<Person, PersonVM> Mapper
@@ -281,26 +212,6 @@ namespace MVVMApplication.ViewModel
             {
                 result = "PersonVM_Mapper_Extra_Members";
             }
-            return result;
-        }
-
-        private Person GetUnMappedPerson(PersonVM mappedPerson)
-        {
-            Person result;
-            if(mappedPerson != null)
-            {
-                result = Mapper?.MapToSource(mappedPerson);
-            }
-            else
-            {
-                result = null;
-            }
-            //if (mappedPerson == null) return null;
-
-            //if (Mapper == null) return null;
-
-            //Person result = Mapper.MapToSource(mappedPerson);
-
             return result;
         }
 

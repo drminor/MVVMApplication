@@ -18,7 +18,7 @@
 
     <pb:PropBagTemplate x:Key="PersonVM"
                         ClassName="PersonVM"
-                        DeriveFromClassMode="Custom"
+                        DeriveFromClassMode="PropBag"
                         TargetType="{x:Type vmod:PersonVM}"
                         TypeSafetyMode="Tight"
                         OutPutNameSpace="MVVMApplication.ViewModel">

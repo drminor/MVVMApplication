@@ -32,7 +32,7 @@
         </Style>
         <ObjectDataProvider x:Key="professionEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="Infra:Profession"/>
+                <x:Type TypeName="mod:Profession"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 

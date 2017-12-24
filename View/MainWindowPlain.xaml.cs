@@ -26,9 +26,9 @@ namespace MVVMApplication.View
         {
             InitializeComponent();
 
-            OurData.ShowMessageBox += delegate (object sender, EventArgs args)
+            OurData.ShowMessageBox += delegate (object sender, MessageEventArgs args)
             {
-                MessageBox.Show(((MessageEventArgs)args).Message);
+                MessageBox.Show(args.Message);
             };
 
         }
