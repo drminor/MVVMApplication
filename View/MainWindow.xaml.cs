@@ -4,7 +4,7 @@ using MVVMApplication.ViewModel;
 using System;
 using System.Windows;
 
-namespace MVVMApplication
+namespace MVVMApplication.View
 {
     public partial class MainWindow : Window
     {
@@ -34,6 +34,7 @@ namespace MVVMApplication
             {
                 MessageBox.Show(e.NewValue, "MVVM Application", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
             }
+            //OurData.SetIt<string>(null, "WMessage");
         }
 
         // Our ViewModel is requesting us to close.

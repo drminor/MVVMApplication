@@ -29,17 +29,22 @@
                 <pb:PropBinderField Path="../Business"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="PersonList" PropKind="ObservableCollectionFB" PropertyType="{x:Type vmod:PersonVM}">
+            <pb:PropItem PropertyName="PersonList" PropKind="ObservableCollection" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
                 <!--<pb:TypeInfoField CollectionType="ObservableCollection" TypeParameter1="{x:Type vmod:PersonVM}"/>-->
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="CVS" PropKind="CollectionViewSource" PropertyType="{x:Type vmod:PersonVM}">
+            <!--<pb:PropItem PropertyName="CVS" PropKind="CollectionViewSource" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
-                <!--<pb:PropBinderField Path="./PersonList"/>-->
+                <pb:PropBinderField Path="PersonList"/>
+            </pb:PropItem>-->
+
+            <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
+                <pb:InitialValueField SetToNull="True"/>
+                <pb:PropBinderField Path="PersonList"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" HasStore="False">
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
                 <pb:InitialValueField SetToNull="True"/>
             </pb:PropItem>
 

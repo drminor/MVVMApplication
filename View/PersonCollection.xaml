@@ -45,18 +45,25 @@
         
     </UserControl.Resources>
 
+    <UserControl.CommandBindings>
+        <CommandBinding  Command="ApplicationCommands.Delete" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed"/>
+    </UserControl.CommandBindings>
+
     <!--SelectedItem="{Binding SelectedPerson, Converter={StaticResource SelectedItemConverter}, Mode=TwoWay}">-->
 
 
-    <Grid Name="TestGrid1">
+    <Grid Name="TestGrid1" Width="450">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="448"
-                  ItemsSource="{Binding CVS.View}">
+
+        <!--ItemsSource="{Binding CVS.Source.Data}">-->
+
+        <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="448" HorizontalAlignment="Center"
+                  ItemsSource="{Binding PersonListView}">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Path=FirstName}" Header="FirstName" Width="100"/>
                 <DataGridTextColumn Binding="{Binding LastName}" Header="LastName" Width="120"/>
@@ -66,7 +73,7 @@
             
         </DataGrid>
 
-        <Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{Binding CVS.View/, Mode=TwoWay}" >
+        <Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{Binding PersonListView/, Mode=TwoWay}" Width="448" HorizontalAlignment="Center" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
@@ -89,11 +96,21 @@
             <ComboBox Grid.Row="1" Grid.Column="3" SelectedItem="{Binding Path=Profession, Mode=TwoWay}"
                       ItemsSource="{Binding Source={StaticResource professionEnum}}"></ComboBox>
         </Grid>
-        
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0, 10, 0, 0">
-            <Button Command="{Binding Add}" Content="Add New"></Button>
-            <Button Command="{Binding Save}" Content="Update"></Button>
-            <Button Command="{Binding Delete}" Content="Delete"></Button>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 10, 0, 0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="5, 0, 25, 0">
+                <Button Command="{Binding PageUp}" Content="Page Up"></Button>
+                <Button Command="{Binding PageDown}" Content="Page Down"></Button>
+                <Button Command="{Binding Refresh}" Content="Refresh"></Button>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="25, 0, 0, 0">
+                <Button Command="{Binding Add}" Content="Add New"></Button>
+                <Button Command="{Binding Save}" Content="Update"></Button>
+                <Button Command="{Binding Delete}" Content="Delete"></Button>
+                <!--<Button Command="ApplicationCommands.Delete" Content="Delete"></Button>-->
+
+            </StackPanel>
         </StackPanel>
 
     </Grid>

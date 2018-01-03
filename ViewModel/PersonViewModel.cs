@@ -2,8 +2,6 @@
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MVVMApplication.ViewModel
 {

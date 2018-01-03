@@ -31,6 +31,13 @@ namespace MVVMApplication.Model
             return result;
         }
 
+        internal IEnumerable<Person> Get(int start, int count)
+        {
+            if (start < 0) throw new ArgumentException("Start must be greater than, or equal to zero.");
+            IEnumerable<Person> result = _dbContext.Person.OrderBy(x => x.Id).Skip(start).Take(count);
+            return result;
+        }
+
         internal void Delete(Person personToDelete)
         {
             if(personToDelete == null || personToDelete.Id == 0) return;

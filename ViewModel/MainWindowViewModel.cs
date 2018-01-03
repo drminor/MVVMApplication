@@ -2,8 +2,7 @@
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.TypeSafePropertyBag;
-using MVVMApplication.Infra;
-using MVVMApplication.Model;
+
 using System;
 using System.Threading;
 
