@@ -1,8 +1,12 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.TypeSafePropertyBag;
-
+using MVVMApplication.Infra;
+using MVVMApplication.Model;
+using MVVMApplication.ServiceAdapters;
+using MVVMApplication.Services;
 using System;
 using System.Threading;
 
@@ -15,8 +19,13 @@ namespace MVVMApplication.ViewModel
         public MainWindowViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
             : base(pm, fullClassName, propFactory)
         {
-            //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
-            //System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
+            System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
+
+            PersonDBActivator dBActivator = new PersonDBActivator(System.Environment.SpecialFolder.CommonApplicationData);
+            Business b = new Business(dBActivator.DbContext);
+            SetIt(b, "Business");
+
+            System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
         }
 
         public void CloseTheWindow()
@@ -30,6 +39,5 @@ namespace MVVMApplication.ViewModel
         {
             CloseTheWindow();
         }
-
     }
 }

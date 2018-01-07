@@ -11,7 +11,7 @@
             xmlns:mod="clr-namespace:MVVMApplication.Model"
             
             mc:Ignorable="d" 
-            d:DesignHeight="300" d:DesignWidth="500" >
+            d:DesignHeight="400" d:DesignWidth="500" >
 
     <UserControl.Resources>
         <Style TargetType="TextBlock">
@@ -52,18 +52,19 @@
     <!--SelectedItem="{Binding SelectedPerson, Converter={StaticResource SelectedItemConverter}, Mode=TwoWay}">-->
 
 
-    <Grid Name="TestGrid1" Width="450">
+    <Grid Name="TestGrid1" Width="510">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="70"></RowDefinition>
+            <RowDefinition Height="35"></RowDefinition>
         </Grid.RowDefinitions>
 
 
         <!--ItemsSource="{Binding CVS.Source.Data}">-->
 
-        <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="448" HorizontalAlignment="Center"
-                  ItemsSource="{Binding PersonListView}">
+        <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="500" HorizontalAlignment="Center"
+                 VerticalScrollBarVisibility="Visible" VerticalAlignment="Stretch" VirtualizingStackPanel.VirtualizationMode="Standard"
+                  VirtualizingStackPanel.IsVirtualizing="True" ItemsSource="{Binding PersonListView}">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Path=FirstName}" Header="FirstName" Width="100"/>
                 <DataGridTextColumn Binding="{Binding LastName}" Header="LastName" Width="120"/>
@@ -73,7 +74,8 @@
             
         </DataGrid>
 
-        <Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{Binding PersonListView/, Mode=TwoWay}" Width="448" HorizontalAlignment="Center" >
+        <Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{Binding PersonListView/, Mode=TwoWay}" Width="500"
+              HorizontalAlignment="Center" Margin="0,10,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>

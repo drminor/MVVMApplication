@@ -71,14 +71,17 @@
     <Compile Include="Infra\NotificationClass.cs" />
     <Compile Include="Infra\DataContextProvider.cs" />
     <Compile Include="Model\ListOfPersons.cs" />
+    <None Include="ServiceAdapters\CrudWithMapping_NotUsed.cs" />
+    <None Include="Services\TypedBusiness_NotUsed.cs" />
+    <Compile Include="Services\PersonDBActivator.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModel\PersonCollectionPlainViewModel.cs" />
     <Compile Include="View\PersonCollectionPlain.xaml.cs">
       <DependentUpon>PersonCollectionPlain.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\Business.cs" />
+    <Compile Include="Services\Business.cs" />
     <Compile Include="Model\Person.cs" />
-    <Compile Include="Model\PersonDB.cs" />
+    <Compile Include="Services\PersonDB.cs" />
     <Compile Include="ViewModel\MainWindowPlainViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\PersonCollectionViewModel.cs" />

@@ -1,5 +1,6 @@
 ﻿using MVVMApplication.Infra;
 using MVVMApplication.Model;
+using MVVMApplication.Services;
 using System;
 
 namespace MVVMApplication.ViewModel
@@ -18,7 +19,8 @@ namespace MVVMApplication.ViewModel
             }
             else
             {
-                _business = new Business();
+                PersonDBActivator dBActivator = new PersonDBActivator(System.Environment.SpecialFolder.CommonApplicationData);
+                _business = new Business(dBActivator.DbContext);
             }
 
             PersonCollectionPlainViewModel = new PersonCollectionPlainViewModel(_business);

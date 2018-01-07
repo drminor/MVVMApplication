@@ -1,44 +1,47 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using MVVMApplication.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MVVMApplication.Model
+namespace MVVMApplication.Services
 {
-    public class Business : IDisposable
+    public class Business : IDoCRUD<Person>
     {
         PersonDB _dbContext = null;
-        public Business()
-        {
-            string dataDirPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            AppDomain.CurrentDomain.SetData("DataDirectory", dataDirPath);
 
-            //AppDomain.CurrentDomain.SetData("DataDirectory",
-            // Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
-            _dbContext = new PersonDB();
+        public Business(PersonDB dbContext)
+        {
+            _dbContext = dbContext;
         }
 
-        internal IEnumerable<Person> Get(int top = -1)
+        public IEnumerable<Person> Get()
         {
-            IEnumerable<Person> result;
-            if(top != -1)
+            IEnumerable<Person> result = _dbContext.Person.AsEnumerable();
+            return result;
+        }
+
+        public IEnumerable<Person> Get(int top)
+        {
+            if(top == -1)
             {
-                result = _dbContext.Person.Take(top).ToList();
+                return Get();
             }
             else
             {
-                result = _dbContext.Person.ToList();
+                IEnumerable<Person> result = _dbContext.Person.Take(top).ToList();
+                return result;
             }
-            return result;
         }
 
-        internal IEnumerable<Person> Get(int start, int count)
+        public IEnumerable<Person> Get<TKey>(int start, int count, Func<Person, TKey> keySelector)
         {
             if (start < 0) throw new ArgumentException("Start must be greater than, or equal to zero.");
-            IEnumerable<Person> result = _dbContext.Person.OrderBy(x => x.Id).Skip(start).Take(count);
+            IEnumerable<Person> result = _dbContext.Person.OrderBy(keySelector).Skip(start).Take(count);
             return result;
         }
 
-        internal void Delete(Person personToDelete)
+        public void Delete(Person personToDelete)
         {
             if(personToDelete == null || personToDelete.Id == 0) return;
 
@@ -47,7 +50,7 @@ namespace MVVMApplication.Model
             _dbContext.SaveChanges();
         }
 
-        internal void Update(Person updatedPerson)
+        public void Update(Person updatedPerson)
         {
             CheckValidations(updatedPerson);
             if (updatedPerson.Id > 0)
@@ -121,6 +124,8 @@ namespace MVVMApplication.Model
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
+
+
         #endregion
     }
 }

@@ -6,7 +6,8 @@ using DRM.TypeSafePropertyBag;
 
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
-
+using MVVMApplication.ServiceAdapters;
+using MVVMApplication.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,26 +20,26 @@ namespace MVVMApplication.ViewModel
     {
         int ITEMS_PER_PAGE = 10;
         Business _business;
-        int _page = 0;
+        CrudWithMapping<Business, Person, PersonVM> _dal;
+        //int _page = 0;
 
         public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
             : base(pm, fullClassName, propFactory)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 
-            IPropData pg= GetPropGen<ListCollectionView>("PersonListView", false, null, false, true, true, null, out bool wasRegistered, out UInt32 propId);
+            IProp<ListCollectionView> typedProp = GetTypedProp<ListCollectionView>("PersonListView");
+            //IPropData pg= GetPropGen<ListCollectionView>("PersonListView", false, null, false, true, true, null, out bool wasRegistered, out UInt32 propId);
 
-            if(pg.TypedProp is INotifyItemEndEdit iniee)
+            if(typedProp is INotifyItemEndEdit iniee)
             {
                 iniee.ItemEndEdit += Iniee_ItemEndEdit;
             }
 
-            if(pg.TypedProp is INotifyCollectionChanged incc)
+            if(typedProp is INotifyCollectionChanged incc)
             {
                 incc.CollectionChanged += Incc_CollectionChanged;
             }
-
-            CheckListSource();
         }
 
         private void Incc_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -48,17 +49,9 @@ namespace MVVMApplication.ViewModel
                 foreach (object item in e.OldItems)
                 {
                     PersonVM selectedPerson = item as PersonVM;
-
                     if (selectedPerson == null) return;
 
-                    Person unMapped = GetUnMappedPerson(selectedPerson);
-
-                    _business.Delete(unMapped);
-
-                    ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
-                    //lcv.Remove(selectedPerson);
-
-                    //ShowMessage("Selected Person has been removed!");
+                    _dal.Delete(selectedPerson);
                 }
             }
         }
@@ -66,24 +59,9 @@ namespace MVVMApplication.ViewModel
         private void Iniee_ItemEndEdit(object sender, EventArgs e)
         {
             PersonVM selectedPerson = (PersonVM)sender;
-
             if (selectedPerson == null) return;
 
-            Person unMapped = GetUnMappedPerson(selectedPerson);
-
-            _business.Update(unMapped);
-
-            //ShowMessage("Changes are saved !");
-        }
-
-        private void CheckListSource()
-        {
-            //// Create a CollectionViewSource and register the property into the store.
-            //CViewProp<CollectionViewSource, PersonVM> CVS = new CViewProp<CollectionViewSource, PersonVM>(null);
-            //AddProp("CVS", CVS);
-
-            // Refresh the PersonListView property.
-            //RefreshIt(null);
+            _dal.Update(selectedPerson);
         }
 
         #region Command Handlers
@@ -92,10 +70,9 @@ namespace MVVMApplication.ViewModel
         {
             try
             {
-                //ListCollectionView lcv = (ListCollectionView)GetIt<CollectionViewSource>("CVS").View;
                 ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
 
-                PersonVM newPerson = Mapper.GetNewDestination();
+                PersonVM newPerson = _dal.GetNewItem(); //Mapper.GetNewDestination();
                 lcv.AddNewItem(newPerson);
                 lcv.MoveCurrentTo(newPerson);
             }
@@ -119,19 +96,6 @@ namespace MVVMApplication.ViewModel
                 {
                     ShowMessage("No Pending Changes.");
                 }
-
-                ////ListCollectionView lcv = (ListCollectionView)GetIt<CollectionViewSource>("CVS").View;
-                //ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
-
-                //PersonVM selectedPerson = (PersonVM)lcv.CurrentItem;
-
-                //if (selectedPerson == null) return;
-
-                //Person unMapped = GetUnMappedPerson(selectedPerson);
-
-                //_business.Update(unMapped);
-
-                //ShowMessage("Changes are saved !");
             }
             catch (Exception ex)
             {
@@ -141,33 +105,38 @@ namespace MVVMApplication.ViewModel
 
         private void DeletePerson(object o)
         {
-            //ListCollectionView lcv = (ListCollectionView)GetIt<CollectionViewSource>("CVS").View;
             ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
 
             PersonVM selectedPerson = (PersonVM)lcv.CurrentItem;
-
             if (selectedPerson == null) return;
 
-            //Person unMapped = GetUnMappedPerson(selectedPerson);
-
-            //_business.Delete(unMapped);
             lcv.Remove(selectedPerson);
-
             ShowMessage("Selected Person has been removed!");
         }
 
         private void PageUpCom(object o)
         {
             //ShowMessage("We Got a PageUp.");
-            if (--_page < 0) _page = 0;
-            FetchData(_business, _page * ITEMS_PER_PAGE);
+            //if (--_page < 0) _page = 0;
+            //FetchData(_bw, _page * ITEMS_PER_PAGE);
+            ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+            int pos = lcv.CurrentPosition;
+            pos -= ITEMS_PER_PAGE;
+            if (pos < 0) pos = 0;
+            lcv.MoveCurrentToPosition(pos);
         }
 
         private void PageDownCom(object o)
         {
-            //ShowMessage("We Got a PageDown.");
-            if (++_page > 10) _page = 10;
-            FetchData(_business, _page * ITEMS_PER_PAGE);
+            ////ShowMessage("We Got a PageDown.");
+            ////if (++_page > 10) _page = 10;
+            ////FetchData(_bw, _page * ITEMS_PER_PAGE);
+
+            ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+            int pos = lcv.CurrentPosition;
+            pos += ITEMS_PER_PAGE;
+            if (pos > lcv.Count - ITEMS_PER_PAGE) pos = lcv.Count - ITEMS_PER_PAGE;
+            lcv.MoveCurrentToPosition(pos);
         }
 
         private void ShowMessage(string msg)
@@ -232,144 +201,81 @@ namespace MVVMApplication.ViewModel
             if (e.NewValue != _business)
             {
                 _business = e.NewValue;
-                FetchData(_business, 0);
+                _dal = new CrudWithMapping<Business, Person, PersonVM>(_business, Mapper);
+                FetchData(_dal, 0);
             }
         }
 
-        public void FetchData(Business business, int start = 0)
+        private void FetchData(CrudWithMapping<Business, Person, PersonVM> business, int start)
         {
-            //FetchData_Test();
+            ListOfPersons people = new ListOfPersons();
 
-            //if (business == null) return;
-            //CollectionViewSource cvsPrior = GetIt<CollectionViewSource>("CVS");
-            //ICollectionView icvPrior = cvsPrior?.View;
+            if (business != null)
+            {
+                IEnumerable<PersonVM> rawPeople = business.Get(0, 200, x => x.Id); // (start, ITEMS_PER_PAGE, x => x.Id);
 
-            // Set our PersonList property to the list of people for this business and .
-            //ObservableCollection<PersonVM> mappedPeople = GetMappedPeople(business, start);
-            ListOfPersons mappedPeople = GetMappedPeople(business, start);
-            ObservableCollection<PersonVM> rr = (ObservableCollection<PersonVM>)mappedPeople;
+                foreach (PersonVM p in rawPeople)
+                {
+                    people.Add(p);
+                }
+            }
+
+            ObservableCollection<PersonVM> rr = (ObservableCollection<PersonVM>)people;
 
             SetIt(rr, "PersonList");
         }
-
-
-        //public void FetchData_Test()
-        //{
-        //    IProvideAView viewProvider = null;
-        //    ListCollectionView lcv = null;
-
-        //    IProvideAView viewProvider2 = null;
-        //    ListCollectionView lcv2 = null;
-
-        //    if (TryGetViewManager(this, "PersonList", typeof(ObservableCollection<PersonVM>), out IManageCViews cViewManager))
-        //    {
-        //        viewProvider = cViewManager.GetViewProvider();
-        //        lcv = viewProvider.View as ListCollectionView;
-        //    }
-
-        //    if (TryGetViewManager(this, "PersonList", typeof(ObservableCollection<PersonVM>), out IManageCViews cViewManager2))
-        //    {
-        //        viewProvider2 = cViewManager2.GetViewProvider();
-        //        lcv2 = viewProvider2.View as ListCollectionView;
-        //    }
-
-        //    bool test1 = ReferenceEquals(cViewManager, cViewManager2);
-        //    bool test2 = ReferenceEquals(cViewManager.DataSourceProvider, cViewManager2.DataSourceProvider);
-        //    bool test3 = ReferenceEquals(viewProvider, viewProvider2);
-        //    bool test4 = ReferenceEquals(lcv, lcv2);
-
-        //    object d1 = cViewManager.DataSourceProvider.Data;
-
-        //    object d2 = cViewManager.Data;
-
-        //    object d3 = cViewManager.DataSourceProviderProvider.DataSourceProvider.Data;
-
-        //    //var x = cvs.View;
-
-        //    //ListCollectionView ff = GetIt<ListCollectionView>("PersonListView");
-
-        //    //IEnumerable gg = ff?.SourceCollection;
-
-        //    //if(gg != null)
-        //    //{
-        //    //    List<object> hh = new List<object>(gg.Cast<object>());
-
-        //    //    int cnt = hh.Count;
-        //    //}
-
-
-
-        //    System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
-
-        //    //ICollectionView icv = cvs?.View;
-
-        //    //bool testC = ReferenceEquals(cvsPrior, cvs);
-        //    //bool testI = ReferenceEquals(icvPrior, icv);
-
-        //    //if (cvs.View is ListCollectionView lcv)
-        //    //{
-        //    //    SetIt<ListCollectionView>(lcv, "PersonListView");
-        //    //}
-        //    //else
-        //    //{
-        //    //    System.Diagnostics.Debug.WriteLine("The default view of the CollectionViewSource: CVS does not implement ListCollectionView.");
-        //    //    SetIt<ListCollectionView>(null, "PersonListView");
-        //    //}
-
-        //}
-
-        //private void RefreshPersonListView(CollectionViewSource cvs)
-        //{
-        //    if (cvs?.Source is DataSourceProvider dsp)
-        //    {
-        //        dsp.Refresh();
-        //    }
-        //    else
-        //    {
-        //        if (cvs?.Source != null)
-        //        {
-        //            throw new InvalidOperationException("The Source is not a DataSourceProvider.");
-        //        }
-        //    }
-        //}
 
         #endregion
 
         #region AutoMapper Support
 
-        private ListOfPersons GetMappedPeople(Business business, int start)
-        {
-            ListOfPersons result = new ListOfPersons();
+        //private ListOfPersons GetMappedPeople(CrudWithMapping<Person, PersonVM> business, int start)
+        //{
+        //    //ListOfPersons result = new ListOfPersons();
 
-            if (business == null || Mapper == null)
-                return result;
+        //    //if (business == null || Mapper == null)
+        //    //    return result;
 
-            IEnumerable<Person> people = business.Get(start, ITEMS_PER_PAGE);
-            IEnumerable<PersonVM> mappedPeopleRaw = Mapper.MapToDestination(people);
+        //    //IEnumerable<Person> people = business.Get(start, ITEMS_PER_PAGE);
+        //    //IEnumerable<PersonVM> mappedPeopleRaw = Mapper.MapToDestination(people);
 
-            //ObservableCollection<PersonVM> mappedPeople = new ObservableCollection<PersonVM>(mappedPeopleRaw);
+        //    ////ObservableCollection<PersonVM> mappedPeople = new ObservableCollection<PersonVM>(mappedPeopleRaw);
 
-            foreach (PersonVM p in mappedPeopleRaw)
-            {
-                result.Add(p);
-            }
-            return result;
-        }
+        //    //foreach (PersonVM p in mappedPeopleRaw)
+        //    //{
+        //    //    result.Add(p);
+        //    //}
+        //    //return result;
 
-        private Person GetUnMappedPerson(PersonVM mappedPerson)
-        {
-            Person result;
-            if (mappedPerson != null)
-            {
-                result = Mapper?.MapToSource(mappedPerson);
-            }
-            else
-            {
-                result = null;
-            }
+        //    ListOfPersons result = new ListOfPersons();
 
-            return result;
-        }
+        //    if (business != null)
+        //    {
+        //        IEnumerable<PersonVM> people = business.Get(start, ITEMS_PER_PAGE, x => x.Id);
+
+        //        foreach (PersonVM p in people)
+        //        {
+        //            result.Add(p);
+        //        }
+        //    }
+
+        //    return result;
+        //}
+
+        //private Person GetUnMappedPerson(PersonVM mappedPerson)
+        //{
+        //    Person result;
+        //    if (mappedPerson != null)
+        //    {
+        //        result = Mapper?.MapToSource(mappedPerson);
+        //    }
+        //    else
+        //    {
+        //        result = null;
+        //    }
+
+        //    return result;
+        //}
 
         private IPropBagMapper<Person, PersonVM> _mapper;
         private IPropBagMapper<Person, PersonVM> Mapper
@@ -384,7 +290,7 @@ namespace MVVMApplication.ViewModel
 
                     DRM.PropBag.ControlModel.MapperRequest mr = JustSayNo.PropModelProvider.GetMapperRequest(resourceKey);
                     IPropBagMapperKeyGen mapperRequest = JustSayNo.AutoMapperProvider.RegisterMapperRequest(mr);
-                    _mapper = (IPropBagMapper<Person, PersonVM>) JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
+                    _mapper = (IPropBagMapper<Person, PersonVM>)JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
                 }
                 return _mapper;
             }
@@ -394,7 +300,7 @@ namespace MVVMApplication.ViewModel
         {
             string result;
             string packageConfigName = JustSayNo.PackageConfigName;
-            if(packageConfigName == "Emit_Proxy")
+            if (packageConfigName == "Emit_Proxy")
             {
                 result = "PersonVM_Mapper_Emit_Proxy";
             }

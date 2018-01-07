@@ -1,6 +1,7 @@
 ﻿using DRM.PropBag.ControlsWPF;
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
+using MVVMApplication.Services;
 using System;
 using System.Collections.ObjectModel;
 

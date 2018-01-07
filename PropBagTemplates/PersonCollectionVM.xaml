@@ -2,6 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
                     xmlns:mod="clr-namespace:MVVMApplication.Model"
+                    xmlns:dsrv="clr-namespace:MVVMApplication.Services"
+                    xmlns:dada="clr-namespace:MVVMApplication.ServiceAdapters"
                     xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
@@ -19,7 +21,7 @@
 
         <pb:PropBagTemplate.Props>
 
-            <pb:PropItem PropertyName="Business" PropertyType="{x:Type mod:Business}">
+            <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:Business}">
                 <pb:InitialValueField SetToNull="True"/>
                 <pb:PropDoWhenChangedField
                     MethodIsLocal="True"
@@ -31,13 +33,7 @@
 
             <pb:PropItem PropertyName="PersonList" PropKind="ObservableCollection" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
-                <!--<pb:TypeInfoField CollectionType="ObservableCollection" TypeParameter1="{x:Type vmod:PersonVM}"/>-->
             </pb:PropItem>
-
-            <!--<pb:PropItem PropertyName="CVS" PropKind="CollectionViewSource" PropertyType="{x:Type vmod:PersonVM}">
-                <pb:InitialValueField SetToNull="True"/>
-                <pb:PropBinderField Path="PersonList"/>
-            </pb:PropItem>-->
 
             <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
