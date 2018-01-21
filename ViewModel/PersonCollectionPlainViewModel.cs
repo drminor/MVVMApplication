@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBagControlsWPF;
 using MVVMApplication.Infra;
 using MVVMApplication.Model;
 using MVVMApplication.Services;
@@ -11,14 +11,14 @@ namespace MVVMApplication.ViewModel
     {
         public event EventHandler<MessageEventArgs> MessageHasArrived;
 
-        Business _business;
+        PersonDAL _business;
 
-        public PersonCollectionPlainViewModel(Business business)
+        public PersonCollectionPlainViewModel(PersonDAL business)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionPlainViewModel.");
 
             _business = business;
-            if (JustSayNo.InDesignMode())
+            if (PropStoreServicesForThisApp.InDesignMode())
             {
                 PersonCollection = new ObservableCollection<Person>();
             }

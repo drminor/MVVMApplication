@@ -3,17 +3,17 @@ using System.Threading;
 
 namespace MVVMApplication.Infra
 {
-    public class DataContextProvider
+    public class ViewModelProvider
     {
         private Lazy<object> _dataGetter;
 
-        public DataContextProvider(string resourceKey)
+        public ViewModelProvider(string resourceKey)
         {
             ResourceKey = resourceKey;
 
             _dataGetter = new Lazy<object>
             (
-                () => JustSayNo.ViewModelHelper.GetNewViewModel(ResourceKey),
+                () => PropStoreServicesForThisApp.ViewModelHelper.GetNewViewModel(ResourceKey),
                 LazyThreadSafetyMode.PublicationOnly
             );
         }

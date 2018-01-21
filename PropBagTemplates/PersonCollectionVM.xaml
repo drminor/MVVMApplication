@@ -3,9 +3,14 @@
                     xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
                     xmlns:mod="clr-namespace:MVVMApplication.Model"
                     xmlns:dsrv="clr-namespace:MVVMApplication.Services"
-                    xmlns:dada="clr-namespace:MVVMApplication.ServiceAdapters"
-                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+                    xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- TODO: See if we can use the Resource defined in PersonVM.xaml (with key: PersonVM_Mapper_Emit_Proxy) -->
+    <!--<pb:MapperRequest x:Key="PersonVM_Mapper_Emit_Proxy2"
+                      SourceType="{x:Type mod:Person}"
+                      DestinationPropModelKey="PersonVM"
+                      ConfigPackageName="Emit_Proxy" />-->
 
     <pb:PropBagTemplate x:Key="PersonCollectionVM"
                         ClassName="PersonCollectionViewModel"
@@ -21,23 +26,26 @@
 
         <pb:PropBagTemplate.Props>
 
-            <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:Business}">
+            <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:PersonDAL}">
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropDoWhenChangedField
+                <!--<pb:PropDoWhenChangedField
                     MethodIsLocal="True"
                     DeclaringType="{x:Type vmod:PersonCollectionViewModel}"
                     MethodName="DoWhenBusinessChanges"
-                    DoAfterNotify="False"/>
+                    DoAfterNotify="False"/>-->
                 <pb:PropBinderField Path="../Business"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="PersonList" PropKind="ObservableCollection" PropertyType="{x:Type vmod:PersonVM}">
+            <!--<pb:PropItem PropertyName="PersonList" PropKind="ObservableCollection" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
-            </pb:PropItem>
+            </pb:PropItem>-->
 
             <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
+                <!--<pb:InitialValueField CreateNew="True"/>-->
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropBinderField Path="PersonList"/>
+
+                <!--<pb:PropBinderField Path="PersonList"/>-->
+                <pb:PropBinderField Path="Business" MapperRequestResourceKey="PersonVM_Mapper_Emit_Proxy"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">

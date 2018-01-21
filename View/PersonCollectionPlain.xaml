@@ -6,7 +6,7 @@
             xmlns:local="clr-namespace:MVVMApplication.View"
             xmlns:sys="clr-namespace:System;assembly=mscorlib"
             xmlns:Infra="clr-namespace:MVVMApplication.Infra"
-            xmlns:pbb="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
+            xmlns:pbb="clr-namespace:DRM.PropBagControlsWPF.Binders;assembly=PropBag.WPFControls"
             xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
             xmlns:mod="clr-namespace:MVVMApplication.Model"
             mc:Ignorable="d" 

@@ -2,22 +2,22 @@
 
 namespace MVVMApplication.Services
 {
-    public class PersonDBActivator 
+    public class PersonDBActivator_NotUsed 
     {
         public PersonDB DbContext { get; }
 
-        public PersonDBActivator()
+        public PersonDBActivator_NotUsed()
         {
             DbContext = new PersonDB();
         }
 
-        public PersonDBActivator(string dataDirPath)
+        public PersonDBActivator_NotUsed(string dataDirPath)
         {
             AppDomain.CurrentDomain.SetData("DataDirectory", dataDirPath);
             DbContext = new PersonDB();
         }
 
-        public PersonDBActivator(Environment.SpecialFolder specialFolder)
+        public PersonDBActivator_NotUsed(Environment.SpecialFolder specialFolder)
         {
             string dataDirPath = Environment.GetFolderPath(specialFolder);
             AppDomain.CurrentDomain.SetData("DataDirectory", dataDirPath);

@@ -3,21 +3,39 @@ using MVVMApplication.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace MVVMApplication.Services
 {
-    public class Business : IDoCRUD<Person>
+    public class PersonDAL : IDoCRUD<Person>
     {
-        PersonDB _dbContext = null;
+        #region Constructors
 
-        public Business(PersonDB dbContext)
+        public PersonDAL(PersonDB dbContext)
         {
-            _dbContext = dbContext;
+            DbContext = dbContext;
+        }
+
+        public PersonDAL()
+        {
+            DbContext = new PersonDB();
+        }
+
+        #endregion
+
+        public event EventHandler<EventArgs> DataSourceChanged;
+
+        public PersonDB DbContext { get; }
+
+        public IQueryable<Person> All()
+        {
+            IQueryable<Person> test = DbContext.Person.AsQueryable<Person>();
+            return test;
         }
 
         public IEnumerable<Person> Get()
         {
-            IEnumerable<Person> result = _dbContext.Person.AsEnumerable();
+            IEnumerable<Person> result = DbContext.Person.AsEnumerable();
             return result;
         }
 
@@ -29,7 +47,7 @@ namespace MVVMApplication.Services
             }
             else
             {
-                IEnumerable<Person> result = _dbContext.Person.Take(top).ToList();
+                IEnumerable<Person> result = DbContext.Person.Take(top).ToList();
                 return result;
             }
         }
@@ -37,7 +55,7 @@ namespace MVVMApplication.Services
         public IEnumerable<Person> Get<TKey>(int start, int count, Func<Person, TKey> keySelector)
         {
             if (start < 0) throw new ArgumentException("Start must be greater than, or equal to zero.");
-            IEnumerable<Person> result = _dbContext.Person.OrderBy(keySelector).Skip(start).Take(count);
+            IEnumerable<Person> result = DbContext.Person.OrderBy(keySelector).Skip(start).Take(count);
             return result;
         }
 
@@ -45,9 +63,9 @@ namespace MVVMApplication.Services
         {
             if(personToDelete == null || personToDelete.Id == 0) return;
 
-            Person foundPerson = _dbContext.Person.Find(new object[] { personToDelete.Id });
-            _dbContext.Person.Remove(foundPerson);
-            _dbContext.SaveChanges();
+            Person foundPerson = DbContext.Person.Find(new object[] { personToDelete.Id });
+            DbContext.Person.Remove(foundPerson);
+            DbContext.SaveChanges();
         }
 
         public void Update(Person updatedPerson)
@@ -55,7 +73,8 @@ namespace MVVMApplication.Services
             CheckValidations(updatedPerson);
             if (updatedPerson.Id > 0)
             {
-                Person selectedPerson = _dbContext.Person.First(p => p.Id == updatedPerson.Id);
+                Person selectedPerson = DbContext.Person.First(p => p.Id == updatedPerson.Id);
+
                 selectedPerson.FirstName = updatedPerson.FirstName;
                 selectedPerson.LastName = updatedPerson.LastName;
                 selectedPerson.CityOfResidence = updatedPerson.CityOfResidence;
@@ -63,10 +82,16 @@ namespace MVVMApplication.Services
             }
             else
             {
-                _dbContext.Person.Add(updatedPerson);
+                DbContext.Person.Add(updatedPerson);
             }
 
-            _dbContext.SaveChanges();
+            DbContext.SaveChanges();
+        }
+
+        public Person GetNewItem()
+        {
+            Person result = new Person();
+            return result;
         }
 
         private void CheckValidations(Person person)
@@ -90,8 +115,14 @@ namespace MVVMApplication.Services
             }
         }
 
+        private void OnDataSourceChanged(object sender, EventArgs e)
+        {
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(sender, e);
+        }
+
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
+
 
         protected virtual void Dispose(bool disposing)
         {
@@ -100,7 +131,7 @@ namespace MVVMApplication.Services
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (_dbContext != null) _dbContext.Dispose();
+                    if (DbContext != null) DbContext.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

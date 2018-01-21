@@ -11,8 +11,8 @@
 
 <!-- TODO: Create a Custom Markup Extension which requires only a resource key. -->
     <Window.Resources>
-        <ObjectDataProvider x:Key="myDataSource"
-                            ObjectType="{x:Type infra:DataContextProvider}"
+        <ObjectDataProvider x:Key="myViewModel"
+                            ObjectType="{x:Type infra:ViewModelProvider}"
                             MethodName="GetData">
             <ObjectDataProvider.ConstructorParameters>
                 <sys:String>MainWindowVM</sys:String>
@@ -21,7 +21,7 @@
     </Window.Resources>
 
     <Window.DataContext>
-        <Binding Source="{StaticResource myDataSource}"/>
+        <Binding Source="{StaticResource myViewModel}"/>
     </Window.DataContext>
 
     <Grid>

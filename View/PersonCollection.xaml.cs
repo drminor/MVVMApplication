@@ -11,42 +11,42 @@ namespace MVVMApplication.View
             InitializeComponent();
         }
 
-        private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
-
-        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            DeleteCurRow();
-        }
-
-        private DataGrid MyDataGrid => FindName("PersonListDataGrid") as DataGrid;
+        //private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         //{
-        //    get
-        //    {
-        //        object grid = FindName("PersonListDataGrid");
-        //        if(grid is DataGrid dg)
-        //        {
-        //            return dg;
-        //        }
-        //        else
-        //        {
-        //            return null;
-        //        }
-
-        //    }
+        //    e.CanExecute = true;
         //}
 
-        private object SelectedItem => MyDataGrid?.SelectedItem;
+        //private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    DeleteCurRow();
+        //}
+
+        //private DataGrid MyDataGrid => FindName("PersonListDataGrid") as DataGrid;
+        ////{
+        ////    get
+        ////    {
+        ////        object grid = FindName("PersonListDataGrid");
+        ////        if(grid is DataGrid dg)
+        ////        {
+        ////            return dg;
+        ////        }
+        ////        else
+        ////        {
+        ////            return null;
+        ////        }
+
+        ////    }
+        ////}
+
+        //private object SelectedItem => MyDataGrid?.SelectedItem;
 
 
-        private void DeleteCurRow()
-        {
-            if(SelectedItem != null)
-                MyDataGrid?.Items?.Remove(SelectedItem);
+        //private void DeleteCurRow()
+        //{
+        //    if(SelectedItem != null)
+        //        MyDataGrid?.Items?.Remove(SelectedItem);
 
-        }
+        //}
 
     }
 }

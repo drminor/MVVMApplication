@@ -66,20 +66,21 @@
     <Compile Include="FrontWindow.xaml.cs">
       <DependentUpon>FrontWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Infra\AutoMapperHelpers.cs" />
+    <Compile Include="Infra\PropStoreServicesForThisApp.cs" />
     <Compile Include="Infra\MessageEventArgs.cs" />
     <Compile Include="Infra\NotificationClass.cs" />
-    <Compile Include="Infra\DataContextProvider.cs" />
+    <Compile Include="Infra\AMServiceRef.cs" />
+    <Compile Include="Infra\PSServiceRef.cs" />
+    <Compile Include="Infra\ViewModelProvider.cs" />
     <Compile Include="Model\ListOfPersons.cs" />
-    <None Include="ServiceAdapters\CrudWithMapping_NotUsed.cs" />
     <None Include="Services\TypedBusiness_NotUsed.cs" />
-    <Compile Include="Services\PersonDBActivator.cs" />
+    <Compile Include="Services\PersonDBActivator_NotUsed.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModel\PersonCollectionPlainViewModel.cs" />
     <Compile Include="View\PersonCollectionPlain.xaml.cs">
       <DependentUpon>PersonCollectionPlain.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Services\Business.cs" />
+    <Compile Include="Services\PersonDAL.cs" />
     <Compile Include="Model\Person.cs" />
     <Compile Include="Services\PersonDB.cs" />
     <Compile Include="ViewModel\MainWindowPlainViewModel.cs" />
@@ -165,6 +166,10 @@
     <ProjectReference Include="..\PubPropBag\AutoMapperSupport\AutoMapperSupport.csproj">
       <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
       <Name>AutoMapperSupport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PubPropBag\CommonAppData\CommonAppData.csproj">
+      <Project>{a12af270-3e58-462c-8661-3dbd9926c777}</Project>
+      <Name>CommonAppData</Name>
     </ProjectReference>
     <ProjectReference Include="..\PubPropBag\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>

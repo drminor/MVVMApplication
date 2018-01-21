@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MVVMApplication.View"
         xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
         xmlns:view="clr-namespace:MVVMApplication.View"
-        xmlns:pbb="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
+        xmlns:pbb="clr-namespace:DRM.PropBagControlsWPF.Binders;assembly=PropBag.WPFControls"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="725">
     

@@ -1,4 +1,5 @@
 ﻿using MVVMApplication.View;
+using System;
 using System.Windows;
 
 namespace MVVMApplication
@@ -8,6 +9,8 @@ namespace MVVMApplication
         public FrontWindow()
         {
             InitializeComponent();
+
+            SetDataDirLocation();
         }
 
         private void Plain_Click(object sender, RoutedEventArgs e)
@@ -30,6 +33,13 @@ namespace MVVMApplication
         {
             MainWindow mw = new MainWindow(packageConfigName);
             mw.ShowDialog();
+        }
+
+        private void SetDataDirLocation()
+        {
+            Environment.SpecialFolder comAppDataFolder = System.Environment.SpecialFolder.CommonApplicationData;
+            string dataDirPath = Environment.GetFolderPath(comAppDataFolder);
+            AppDomain.CurrentDomain.SetData("DataDirectory", dataDirPath);
         }
 
     }

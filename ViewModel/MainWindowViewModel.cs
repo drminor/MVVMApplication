@@ -1,31 +1,31 @@
-﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
+﻿using CommonAppData;
+using DRM.PropBag;
+using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
-using MVVMApplication.Infra;
-using MVVMApplication.Model;
-using MVVMApplication.ServiceAdapters;
+
 using MVVMApplication.Services;
 using System;
 using System.Threading;
 
 namespace MVVMApplication.ViewModel
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class MainWindowViewModel : PropBag
     {
         public event EventHandler<EventArgs> RequestClose;
 
-        public MainWindowViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
-            : base(pm, fullClassName, propFactory)
+        public MainWindowViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
-            System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
+            //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
 
-            PersonDBActivator dBActivator = new PersonDBActivator(System.Environment.SpecialFolder.CommonApplicationData);
-            Business b = new Business(dBActivator.DbContext);
-            SetIt(b, "Business");
+            //IHaveADbContext dBActivator = new DBActivator<PersonDB>(System.Environment.SpecialFolder.CommonApplicationData);
+            //PersonDB personDb = (PersonDB)dBActivator.DbContext;
+            //PersonDAL b = new PersonDAL(personDb);
+            //SetIt(b, "Business");
 
-            System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
+            //System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
         }
 
         public void CloseTheWindow()

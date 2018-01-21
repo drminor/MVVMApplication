@@ -1,67 +1,23 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
+using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
-
-using MVVMApplication.Infra;
-using MVVMApplication.Model;
-using MVVMApplication.ServiceAdapters;
 using MVVMApplication.Services;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Data;
 
 namespace MVVMApplication.ViewModel
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public partial class PersonCollectionViewModel : PropBag
     {
-        int ITEMS_PER_PAGE = 10;
-        Business _business;
-        CrudWithMapping<Business, Person, PersonVM> _dal;
-        //int _page = 0;
+        //int ITEMS_PER_PAGE = 10;
 
-        public PersonCollectionViewModel(PropModel pm, string fullClassName, IPropFactory propFactory)
-            : base(pm, fullClassName, propFactory)
+        public PersonCollectionViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
-
-            IProp<ListCollectionView> typedProp = GetTypedProp<ListCollectionView>("PersonListView");
-            //IPropData pg= GetPropGen<ListCollectionView>("PersonListView", false, null, false, true, true, null, out bool wasRegistered, out UInt32 propId);
-
-            if(typedProp is INotifyItemEndEdit iniee)
-            {
-                iniee.ItemEndEdit += Iniee_ItemEndEdit;
-            }
-
-            if(typedProp is INotifyCollectionChanged incc)
-            {
-                incc.CollectionChanged += Incc_CollectionChanged;
-            }
-        }
-
-        private void Incc_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (object item in e.OldItems)
-                {
-                    PersonVM selectedPerson = item as PersonVM;
-                    if (selectedPerson == null) return;
-
-                    _dal.Delete(selectedPerson);
-                }
-            }
-        }
-
-        private void Iniee_ItemEndEdit(object sender, EventArgs e)
-        {
-            PersonVM selectedPerson = (PersonVM)sender;
-            if (selectedPerson == null) return;
-
-            _dal.Update(selectedPerson);
         }
 
         #region Command Handlers
@@ -72,9 +28,16 @@ namespace MVVMApplication.ViewModel
             {
                 ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
 
-                PersonVM newPerson = _dal.GetNewItem(); //Mapper.GetNewDestination();
-                lcv.AddNewItem(newPerson);
-                lcv.MoveCurrentTo(newPerson);
+                if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+                {
+                    PersonVM newPerson = (PersonVM) cViewManager.GetNewItem();
+                    lcv.AddNewItem(newPerson);
+                    lcv.MoveCurrentTo(newPerson);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Could not get the view manager -- Fix this message.");
+                }
             }
             catch (Exception ex)
             {
@@ -114,30 +77,30 @@ namespace MVVMApplication.ViewModel
             ShowMessage("Selected Person has been removed!");
         }
 
-        private void PageUpCom(object o)
-        {
-            //ShowMessage("We Got a PageUp.");
-            //if (--_page < 0) _page = 0;
-            //FetchData(_bw, _page * ITEMS_PER_PAGE);
-            ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
-            int pos = lcv.CurrentPosition;
-            pos -= ITEMS_PER_PAGE;
-            if (pos < 0) pos = 0;
-            lcv.MoveCurrentToPosition(pos);
-        }
+        //private void PageUpCom(object o)
+        //{
+        //    //ShowMessage("We Got a PageUp.");
+        //    //if (--_page < 0) _page = 0;
+        //    //FetchData(_bw, _page * ITEMS_PER_PAGE);
+        //    ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+        //    int pos = lcv.CurrentPosition;
+        //    pos -= ITEMS_PER_PAGE;
+        //    if (pos < 0) pos = 0;
+        //    lcv.MoveCurrentToPosition(pos);
+        //}
 
-        private void PageDownCom(object o)
-        {
-            ////ShowMessage("We Got a PageDown.");
-            ////if (++_page > 10) _page = 10;
-            ////FetchData(_bw, _page * ITEMS_PER_PAGE);
+        //private void PageDownCom(object o)
+        //{
+        //    ////ShowMessage("We Got a PageDown.");
+        //    ////if (++_page > 10) _page = 10;
+        //    ////FetchData(_bw, _page * ITEMS_PER_PAGE);
 
-            ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
-            int pos = lcv.CurrentPosition;
-            pos += ITEMS_PER_PAGE;
-            if (pos > lcv.Count - ITEMS_PER_PAGE) pos = lcv.Count - ITEMS_PER_PAGE;
-            lcv.MoveCurrentToPosition(pos);
-        }
+        //    ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+        //    int pos = lcv.CurrentPosition;
+        //    pos += ITEMS_PER_PAGE;
+        //    if (pos > lcv.Count - ITEMS_PER_PAGE) pos = lcv.Count - ITEMS_PER_PAGE;
+        //    lcv.MoveCurrentToPosition(pos);
+        //}
 
         private void ShowMessage(string msg)
         {
@@ -147,15 +110,14 @@ namespace MVVMApplication.ViewModel
 
         public void RefreshIt(object o)
         {
-            //CollectionViewSource cvs = GetIt<CollectionViewSource>("CVS");
-            //if (cvs != null)
-            //{
-            //    RefreshPersonListView(cvs);
-            //}
-            //else
-            //{
-            //    System.Diagnostics.Debug.WriteLine($"The CVS has no value.");
-            //}
+            if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+            {
+                cViewManager.GetDefaultCollectionView().Refresh();
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Could not get the view manager -- Fix this message.");
+            }
         }
 
         #endregion
@@ -166,9 +128,34 @@ namespace MVVMApplication.ViewModel
         {
             get
             {
-                var x = new RelayCommand(AddPerson);
+                var x = new RelayCommand(AddPerson, CanAddNewItem);
                 x.CanExecuteChanged += X_CanExecuteChanged;
                 return x;
+            }
+        }
+
+        private bool CanAddNewItem()
+        {
+            if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+            {
+                if(cViewManager.IsReadOnly())
+                {
+                    return false;
+                }
+
+                if(cViewManager.GetDefaultCollectionView() is IEditableCollectionView iecv)
+                {
+                    bool result = !(iecv.IsAddingNew || iecv.IsEditingItem);
+                    return result;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -181,135 +168,11 @@ namespace MVVMApplication.ViewModel
 
         public RelayCommand Delete => new RelayCommand(DeletePerson);
 
-        public RelayCommand PageUp => new RelayCommand(PageUpCom);
+        //public RelayCommand PageUp => new RelayCommand(PageUpCom);
 
-        public RelayCommand PageDown => new RelayCommand(PageDownCom);
+        //public RelayCommand PageDown => new RelayCommand(PageDownCom);
 
         public RelayCommand Refresh => new RelayCommand(RefreshIt);
-
-
-        #endregion
-
-        #region Event Handlers
-
-        private void DoWhenBusinessChanges(object sender, PcTypedEventArgs<Business> e)
-        {
-            System.Diagnostics.Debug.WriteLine("DoWhenBusinessChanges was called.");
-
-            if (e.NewValueIsUndefined) e.NewValue = null;
-
-            if (e.NewValue != _business)
-            {
-                _business = e.NewValue;
-                _dal = new CrudWithMapping<Business, Person, PersonVM>(_business, Mapper);
-                FetchData(_dal, 0);
-            }
-        }
-
-        private void FetchData(CrudWithMapping<Business, Person, PersonVM> business, int start)
-        {
-            ListOfPersons people = new ListOfPersons();
-
-            if (business != null)
-            {
-                IEnumerable<PersonVM> rawPeople = business.Get(0, 200, x => x.Id); // (start, ITEMS_PER_PAGE, x => x.Id);
-
-                foreach (PersonVM p in rawPeople)
-                {
-                    people.Add(p);
-                }
-            }
-
-            ObservableCollection<PersonVM> rr = (ObservableCollection<PersonVM>)people;
-
-            SetIt(rr, "PersonList");
-        }
-
-        #endregion
-
-        #region AutoMapper Support
-
-        //private ListOfPersons GetMappedPeople(CrudWithMapping<Person, PersonVM> business, int start)
-        //{
-        //    //ListOfPersons result = new ListOfPersons();
-
-        //    //if (business == null || Mapper == null)
-        //    //    return result;
-
-        //    //IEnumerable<Person> people = business.Get(start, ITEMS_PER_PAGE);
-        //    //IEnumerable<PersonVM> mappedPeopleRaw = Mapper.MapToDestination(people);
-
-        //    ////ObservableCollection<PersonVM> mappedPeople = new ObservableCollection<PersonVM>(mappedPeopleRaw);
-
-        //    //foreach (PersonVM p in mappedPeopleRaw)
-        //    //{
-        //    //    result.Add(p);
-        //    //}
-        //    //return result;
-
-        //    ListOfPersons result = new ListOfPersons();
-
-        //    if (business != null)
-        //    {
-        //        IEnumerable<PersonVM> people = business.Get(start, ITEMS_PER_PAGE, x => x.Id);
-
-        //        foreach (PersonVM p in people)
-        //        {
-        //            result.Add(p);
-        //        }
-        //    }
-
-        //    return result;
-        //}
-
-        //private Person GetUnMappedPerson(PersonVM mappedPerson)
-        //{
-        //    Person result;
-        //    if (mappedPerson != null)
-        //    {
-        //        result = Mapper?.MapToSource(mappedPerson);
-        //    }
-        //    else
-        //    {
-        //        result = null;
-        //    }
-
-        //    return result;
-        //}
-
-        private IPropBagMapper<Person, PersonVM> _mapper;
-        private IPropBagMapper<Person, PersonVM> Mapper
-        {
-            get
-            {
-                if (_mapper == null)
-                {
-                    string resourceKey = GetMapperRequestKey();
-
-                    System.Diagnostics.Debug.WriteLine($"Creating PersonVM Mapper using {resourceKey}.");
-
-                    DRM.PropBag.ControlModel.MapperRequest mr = JustSayNo.PropModelProvider.GetMapperRequest(resourceKey);
-                    IPropBagMapperKeyGen mapperRequest = JustSayNo.AutoMapperProvider.RegisterMapperRequest(mr);
-                    _mapper = (IPropBagMapper<Person, PersonVM>)JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
-                }
-                return _mapper;
-            }
-        }
-
-        private string GetMapperRequestKey()
-        {
-            string result;
-            string packageConfigName = JustSayNo.PackageConfigName;
-            if (packageConfigName == "Emit_Proxy")
-            {
-                result = "PersonVM_Mapper_Emit_Proxy";
-            }
-            else
-            {
-                result = "PersonVM_Mapper_Extra_Members";
-            }
-            return result;
-        }
 
         #endregion
     }

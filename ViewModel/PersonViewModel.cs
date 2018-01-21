@@ -1,14 +1,15 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
 
 namespace MVVMApplication.ViewModel
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class PersonVM : PropBag, ICloneable
     {
-        public PersonVM(PropModel pm, string fullClassName, IPropFactory propFactory)
-            : base(pm, fullClassName, propFactory)
+        public PersonVM(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
         }
 

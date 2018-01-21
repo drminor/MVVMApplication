@@ -6,7 +6,7 @@
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
             xmlns:sys="clr-namespace:System;assembly=mscorlib"
             xmlns:Infra="clr-namespace:MVVMApplication.Infra"
-            xmlns:pbb="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
+            xmlns:pbb="clr-namespace:DRM.PropBagControlsWPF.Binders;assembly=PropBag.WPFControls"
             xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
             xmlns:mod="clr-namespace:MVVMApplication.Model"
             
@@ -45,9 +45,9 @@
         
     </UserControl.Resources>
 
-    <UserControl.CommandBindings>
+    <!--<UserControl.CommandBindings>
         <CommandBinding  Command="ApplicationCommands.Delete" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed"/>
-    </UserControl.CommandBindings>
+    </UserControl.CommandBindings>-->
 
     <!--SelectedItem="{Binding SelectedPerson, Converter={StaticResource SelectedItemConverter}, Mode=TwoWay}">-->
 

@@ -1,4 +1,5 @@
-﻿using MVVMApplication.Infra;
+﻿using CommonAppData;
+using MVVMApplication.Infra;
 using MVVMApplication.Model;
 using MVVMApplication.Services;
 using System;
@@ -9,18 +10,19 @@ namespace MVVMApplication.ViewModel
     {
         public EventHandler<MessageEventArgs> ShowMessageBox = delegate { };
 
-        Business _business;
+        PersonDAL _business;
 
         public MainWindowPlainViewModel() 
         {
-            if(JustSayNo.InDesignMode())
+            if(PropStoreServicesForThisApp.InDesignMode())
             {
                 _business = null;
             }
             else
             {
-                PersonDBActivator dBActivator = new PersonDBActivator(System.Environment.SpecialFolder.CommonApplicationData);
-                _business = new Business(dBActivator.DbContext);
+                IHaveADbContext dBActivator = new DBActivator<PersonDB>(System.Environment.SpecialFolder.CommonApplicationData);
+                PersonDB personDb = (PersonDB)dBActivator.DbContext;
+                _business = new PersonDAL(personDb);
             }
 
             PersonCollectionPlainViewModel = new PersonCollectionPlainViewModel(_business);
